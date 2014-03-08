@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C056E4F918CBC8FC00C37058 /* ReadMe in Resources */ = {isa = PBXBuildFile; fileRef = C056E4F818CBC8FC00C37058 /* ReadMe */; };
 		C0FBA98518CA5FAA00BA97F3 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0FBA98418CA5FAA00BA97F3 /* Foundation.framework */; };
 		C0FBA98718CA5FAA00BA97F3 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0FBA98618CA5FAA00BA97F3 /* CoreGraphics.framework */; };
 		C0FBA98918CA5FAA00BA97F3 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0FBA98818CA5FAA00BA97F3 /* UIKit.framework */; };
@@ -37,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C056E4F818CBC8FC00C37058 /* ReadMe */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReadMe; sourceTree = "<group>"; };
 		C0FBA98118CA5FAA00BA97F3 /* GuidesLocal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuidesLocal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0FBA98418CA5FAA00BA97F3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C0FBA98618CA5FAA00BA97F3 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -91,6 +93,7 @@
 		C0FBA97818CA5FAA00BA97F3 = {
 			isa = PBXGroup;
 			children = (
+				C056E4F818CBC8FC00C37058 /* ReadMe */,
 				C0FBA98A18CA5FAA00BA97F3 /* GuidesLocal */,
 				C0FBA9AF18CA5FAA00BA97F3 /* GuidesLocalTests */,
 				C0FBA98318CA5FAA00BA97F3 /* Frameworks */,
@@ -268,6 +271,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C056E4F918CBC8FC00C37058 /* ReadMe in Resources */,
 				C0FBA99B18CA5FAA00BA97F3 /* Main_iPad.storyboard in Resources */,
 				C0FBA9A318CA5FAA00BA97F3 /* Images.xcassets in Resources */,
 				C0FBA99818CA5FAA00BA97F3 /* Main_iPhone.storyboard in Resources */,
