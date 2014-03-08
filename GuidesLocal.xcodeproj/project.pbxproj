@@ -15,14 +15,15 @@
 		C0FBA99518CA5FAA00BA97F3 /* GuidesLocalAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA99418CA5FAA00BA97F3 /* GuidesLocalAppDelegate.m */; };
 		C0FBA99818CA5FAA00BA97F3 /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C0FBA99618CA5FAA00BA97F3 /* Main_iPhone.storyboard */; };
 		C0FBA99B18CA5FAA00BA97F3 /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C0FBA99918CA5FAA00BA97F3 /* Main_iPad.storyboard */; };
-		C0FBA99E18CA5FAA00BA97F3 /* GuidesLocalMasterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA99D18CA5FAA00BA97F3 /* GuidesLocalMasterViewController.m */; };
-		C0FBA9A118CA5FAA00BA97F3 /* GuidesLocalDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9A018CA5FAA00BA97F3 /* GuidesLocalDetailViewController.m */; };
 		C0FBA9A318CA5FAA00BA97F3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0FBA9A218CA5FAA00BA97F3 /* Images.xcassets */; };
 		C0FBA9AA18CA5FAA00BA97F3 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0FBA9A918CA5FAA00BA97F3 /* XCTest.framework */; };
 		C0FBA9AB18CA5FAA00BA97F3 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0FBA98418CA5FAA00BA97F3 /* Foundation.framework */; };
 		C0FBA9AC18CA5FAA00BA97F3 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0FBA98818CA5FAA00BA97F3 /* UIKit.framework */; };
 		C0FBA9B418CA5FAA00BA97F3 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0FBA9B218CA5FAA00BA97F3 /* InfoPlist.strings */; };
 		C0FBA9B618CA5FAA00BA97F3 /* GuidesLocalTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9B518CA5FAA00BA97F3 /* GuidesLocalTests.m */; };
+		C0FBA9C118CA606100BA97F3 /* GuideMasterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9C018CA606100BA97F3 /* GuideMasterViewController.m */; };
+		C0FBA9C418CA609700BA97F3 /* GuideDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9C318CA609700BA97F3 /* GuideDetailViewController.m */; };
+		C0FBA9CA18CA610000BA97F3 /* GuideDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9C918CA610000BA97F3 /* GuideDocument.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,16 +49,19 @@
 		C0FBA99418CA5FAA00BA97F3 /* GuidesLocalAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GuidesLocalAppDelegate.m; sourceTree = "<group>"; };
 		C0FBA99718CA5FAA00BA97F3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPhone.storyboard; sourceTree = "<group>"; };
 		C0FBA99A18CA5FAA00BA97F3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main_iPad.storyboard; sourceTree = "<group>"; };
-		C0FBA99C18CA5FAA00BA97F3 /* GuidesLocalMasterViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GuidesLocalMasterViewController.h; sourceTree = "<group>"; };
-		C0FBA99D18CA5FAA00BA97F3 /* GuidesLocalMasterViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GuidesLocalMasterViewController.m; sourceTree = "<group>"; };
-		C0FBA99F18CA5FAA00BA97F3 /* GuidesLocalDetailViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GuidesLocalDetailViewController.h; sourceTree = "<group>"; };
-		C0FBA9A018CA5FAA00BA97F3 /* GuidesLocalDetailViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GuidesLocalDetailViewController.m; sourceTree = "<group>"; };
 		C0FBA9A218CA5FAA00BA97F3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		C0FBA9A818CA5FAA00BA97F3 /* GuidesLocalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GuidesLocalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0FBA9A918CA5FAA00BA97F3 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		C0FBA9B118CA5FAA00BA97F3 /* GuidesLocalTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GuidesLocalTests-Info.plist"; sourceTree = "<group>"; };
 		C0FBA9B318CA5FAA00BA97F3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C0FBA9B518CA5FAA00BA97F3 /* GuidesLocalTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GuidesLocalTests.m; sourceTree = "<group>"; };
+		C0FBA9BF18CA606100BA97F3 /* GuideMasterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuideMasterViewController.h; sourceTree = "<group>"; };
+		C0FBA9C018CA606100BA97F3 /* GuideMasterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GuideMasterViewController.m; sourceTree = "<group>"; };
+		C0FBA9C218CA609700BA97F3 /* GuideDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuideDetailViewController.h; sourceTree = "<group>"; };
+		C0FBA9C318CA609700BA97F3 /* GuideDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GuideDetailViewController.m; sourceTree = "<group>"; };
+		C0FBA9C818CA610000BA97F3 /* GuideDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuideDocument.h; sourceTree = "<group>"; };
+		C0FBA9C918CA610000BA97F3 /* GuideDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GuideDocument.m; sourceTree = "<group>"; };
+		C0FBA9CB18CA610B00BA97F3 /* FileExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileExtension.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,14 +121,9 @@
 		C0FBA98A18CA5FAA00BA97F3 /* GuidesLocal */ = {
 			isa = PBXGroup;
 			children = (
-				C0FBA99318CA5FAA00BA97F3 /* GuidesLocalAppDelegate.h */,
-				C0FBA99418CA5FAA00BA97F3 /* GuidesLocalAppDelegate.m */,
-				C0FBA99618CA5FAA00BA97F3 /* Main_iPhone.storyboard */,
-				C0FBA99918CA5FAA00BA97F3 /* Main_iPad.storyboard */,
-				C0FBA99C18CA5FAA00BA97F3 /* GuidesLocalMasterViewController.h */,
-				C0FBA99D18CA5FAA00BA97F3 /* GuidesLocalMasterViewController.m */,
-				C0FBA99F18CA5FAA00BA97F3 /* GuidesLocalDetailViewController.h */,
-				C0FBA9A018CA5FAA00BA97F3 /* GuidesLocalDetailViewController.m */,
+				C0FBA9C718CA60E700BA97F3 /* Model */,
+				C0FBA9C618CA60CA00BA97F3 /* Controllers */,
+				C0FBA9C518CA60AB00BA97F3 /* View */,
 				C0FBA9A218CA5FAA00BA97F3 /* Images.xcassets */,
 				C0FBA98B18CA5FAA00BA97F3 /* Supporting Files */,
 			);
@@ -158,6 +157,38 @@
 				C0FBA9B218CA5FAA00BA97F3 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		C0FBA9C518CA60AB00BA97F3 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				C0FBA99618CA5FAA00BA97F3 /* Main_iPhone.storyboard */,
+				C0FBA99918CA5FAA00BA97F3 /* Main_iPad.storyboard */,
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
+		C0FBA9C618CA60CA00BA97F3 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				C0FBA9C218CA609700BA97F3 /* GuideDetailViewController.h */,
+				C0FBA9C318CA609700BA97F3 /* GuideDetailViewController.m */,
+				C0FBA9BF18CA606100BA97F3 /* GuideMasterViewController.h */,
+				C0FBA9C018CA606100BA97F3 /* GuideMasterViewController.m */,
+				C0FBA99318CA5FAA00BA97F3 /* GuidesLocalAppDelegate.h */,
+				C0FBA99418CA5FAA00BA97F3 /* GuidesLocalAppDelegate.m */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
+		C0FBA9C718CA60E700BA97F3 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				C0FBA9CB18CA610B00BA97F3 /* FileExtension.h */,
+				C0FBA9C818CA610000BA97F3 /* GuideDocument.h */,
+				C0FBA9C918CA610000BA97F3 /* GuideDocument.m */,
+			);
+			name = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -260,9 +291,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0FBA99118CA5FAA00BA97F3 /* main.m in Sources */,
+				C0FBA9CA18CA610000BA97F3 /* GuideDocument.m in Sources */,
+				C0FBA9C418CA609700BA97F3 /* GuideDetailViewController.m in Sources */,
 				C0FBA99518CA5FAA00BA97F3 /* GuidesLocalAppDelegate.m in Sources */,
-				C0FBA9A118CA5FAA00BA97F3 /* GuidesLocalDetailViewController.m in Sources */,
-				C0FBA99E18CA5FAA00BA97F3 /* GuidesLocalMasterViewController.m in Sources */,
+				C0FBA9C118CA606100BA97F3 /* GuideMasterViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -481,6 +513,7 @@
 				C0FBA9BB18CA5FAA00BA97F3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C0FBA9BC18CA5FAA00BA97F3 /* Build configuration list for PBXNativeTarget "GuidesLocalTests" */ = {
 			isa = XCConfigurationList;
@@ -489,6 +522,7 @@
 				C0FBA9BE18CA5FAA00BA97F3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
