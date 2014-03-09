@@ -31,30 +31,17 @@
 - (void) setGuideDocument:(GuideDocument *)guideDocument
 {
     _guideDocument = guideDocument;
-    self.guideTextView.text = guideDocument.text;
-    _guideDocument.delegate = self;
-    
+    self.guideTextView.text = self.guideDocument.text;
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
 
-    if (self.guideDocument) {
-        self.guideTextView.text = self.guideDocument.text;
-    }
-    
     self.guideTextView.delegate = self;
     
 }
 
-- (void) viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    [self saveAndCloseDocument ];
-    self.guideDocument = nil;
-}
 
 #pragma mark - Split view
 
@@ -101,7 +88,6 @@
                 if (!success) {
                     NSLog(@"Failed to close %@", self.guideDocument.fileURL);
                 }
-             //   [self.delegate detailViewControllerDidClose:self];
             }];
             })
         ;
@@ -113,19 +99,31 @@
 
 -(void)textViewDidEndEditing:(UITextView *)textView
 {
-    self.guideDocument.text = self.guideTextView.text;
+
+    if (self.guideDocument) {
+    //    NSLog(@"END EDITING");
+        self.guideDocument.text = self.guideTextView.text;
+        [self saveAndCloseDocument ];
+        self.guideDocument = nil;
+    }
 }
 
 -(void)textViewDidBeginEditing:(UITextView *)textView
 {
-    NSLog(@"DID BEGIN EDITING");
+    if (self.guideDocument) {
+     //   NSLog(@"DID BEGIN EDITING");
+        self.guideTextView.text = self.guideDocument.text;
+    }
 }
 
 #pragma mark GuideDocumentDelegate Methods
 
 -(void) guideDocumentContentsUpdated:(GuideDocument *)guideDocument
 {
-    self.guideTextView.text = self.guideDocument.text;
+  //  NSLog(@"CONTENTS UPDATED");
+   self.guideTextView.text =  self.guideDocument.text;
 }
+
+
 
 @end

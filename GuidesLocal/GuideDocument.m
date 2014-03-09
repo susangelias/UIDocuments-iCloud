@@ -66,7 +66,7 @@
 - (UIImage *)image  {
     if (_image == nil) {
         if (self.fileWrapper != nil) {
-            NSLog(@"Loading _image for %@...", self.fileURL);
+         //   NSLog(@"Loading _image for %@...", self.fileURL);
             _image = [self decodeObjectFromWrapperWithPreferredFilename:self.imageFileName];
         } else {
             _image = [[UIImage alloc] init];
@@ -79,7 +79,7 @@
 - (NSString *)text {
     if (!_text) {
         if (self.fileWrapper != nil) {
-            NSLog(@"Loading instruction for %@...", self.fileURL);
+         //   NSLog(@"Loading instruction for %@...", self.fileURL);
             _text = [self decodeObjectFromWrapperWithPreferredFilename:self.textFileName];
         } else {
             _text = [[NSString alloc] init];

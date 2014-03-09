@@ -223,6 +223,13 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
+        // on the iPad, unlink this document from the detail view controller
+        if ([self.detailViewController isKindOfClass:[GuideDetailViewController class]]) {
+            GuideDetailViewController *guideDVC = self.detailViewController;
+            guideDVC.guideDocument = nil;
+            guideDVC.title = @"";
+        }
+        self.selectedDocument = nil;
         // delete the document file
         if ( self.documentsDirectoryPath && ([self.fileList count] > 0) ) {
             // copy name to delete
@@ -240,7 +247,6 @@
                                                           error:nil byAccessor:^(NSURL* writingURL) {
                                                               NSFileManager* fileManager = [[NSFileManager alloc] init];
                                                               NSError *error;
-                                                              //removeSuccess = [fileManager removeItemAtURL:writingURL error:&error];
                                                               removeSuccess = [fileManager removeItemAtPath:[writingURL path] error:&error];
                                                           }];
                 });
@@ -268,14 +274,13 @@
     if (self.selectedDocument) {
         if (self.selectedDocument.documentState & UIDocumentStateClosed) {
             [self.selectedDocument openWithCompletionHandler:^(BOOL success) {
-                
-            }];
+                destinationVC.guideDocument = self.selectedDocument;
+                destinationVC.title = [[self.selectedDocument.fileURL lastPathComponent] stringByDeletingPathExtension];
+                // release hold on selected Document now that it's been passed to the document view controller
+                self.selectedDocument = nil;
+               }];
         }
     }
-    destinationVC.guideDocument = self.selectedDocument;
-    destinationVC.title = [[self.selectedDocument.fileURL lastPathComponent] stringByDeletingPathExtension];
-    // release hold on selected Document now that it's been passed to the document view controller
-    self.selectedDocument = nil;
 
 }
 
@@ -293,12 +298,16 @@
         if ([detail isKindOfClass:[GuideDetailViewController class]]) {
             // yes ... we know how to update that!
             GuideDetailViewController *destinationVC = (GuideDetailViewController *)detail;
+            // on the iPad, need to terminate the previous editing session when the user taps on the left view controller's table cells
+            [destinationVC.guideTextView resignFirstResponder];
             NSURL *url = self.fileList[indexPath.row];
             [self prepareGuideDocumentVC:destinationVC withURL:url];
 
         }
     }
 }
+
+
 
 #pragma mark    Navigation
 
