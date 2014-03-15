@@ -314,13 +314,13 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([[segue identifier] isEqualToString:@"showGuide"]) {
-        if (!self.selectedDocument) {
+      //  if (self.selectedDocument) {
             // open the selected document and pass it to the destination document view controller
             NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
             NSURL *url = self.fileList[indexPath.row];
              [self prepareGuideDocumentVC:[segue destinationViewController] withURL:url ];
 
-            }
+        //    }
     }
 }
 
