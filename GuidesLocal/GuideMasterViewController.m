@@ -10,7 +10,7 @@
 #import "GuideDetailViewController.h"
 #import "FileExtension.h"
 
-@interface GuideMasterViewController ()
+@interface GuideMasterViewController () <GuideDetailViewControllerDelegate>
 
 @property (nonatomic, strong) NSString *documentsDirectoryPath;
 @property (strong, nonatomic) NSMutableArray *fileList;
@@ -32,11 +32,12 @@
 #pragma mark Refresh Methods
 // these methods courtesy of http://www.raywenderlich.com/12779/icloud-and-uidocument-beyond-the-basics-part-1
 
-- (void)loadLocal {
-    
+- (void)loadLocal
+{
     NSURL *fileDirectory = [[NSURL alloc]initFileURLWithPath:self.documentsDirectoryPath];
     NSArray * localDocuments = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:fileDirectory includingPropertiesForKeys:nil options:0 error:nil];
-  //  NSLog(@"Found %d local files.", localDocuments.count);
+
+    [self.fileList removeAllObjects];
     for (int i=0; i < localDocuments.count; i++) {
         
         NSURL * fileURL = [localDocuments objectAtIndex:i];
@@ -49,15 +50,13 @@
     self.navigationItem.rightBarButtonItem.enabled = YES;
 }
 
-- (void)refresh {
-    
-    [self.fileList removeAllObjects];
-    [self.tableView reloadData];
-    
+- (void)refresh
+{
     self.navigationItem.rightBarButtonItem.enabled = NO;
     if (![self iCloudOn]) {
         [self loadLocal];
     }
+    [self.tableView reloadData];
 }
 
 - (void)getListOfGuideDocuments {
@@ -140,6 +139,50 @@
         NSLog(@"ERROR:  self.documentsDirectoryPath = nil");
     }
     return url;
+}
+
+#pragma mark   Guide  File Management Methods
+
+- (void) deleteGuide:(NSURL *)guideURL
+{
+    NSFileManager *fileManager = [[NSFileManager alloc]init];
+    NSError *error;
+    NSString *filePath = [guideURL path];
+    BOOL fileExists = [fileManager fileExistsAtPath:filePath];
+    if (fileExists) {
+        BOOL success = [fileManager removeItemAtURL:guideURL error:&error];
+        if (!success) {
+            NSLog(@"ERROR DELETING FILE %@", error);
+        }
+        else {
+            NSLog(@"FILE DELETED %@", guideURL);
+        }
+    }
+}
+
+
+- (void)renameDirectory: (NSString *)newName
+{
+    // change the file name by moving the file
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
+    
+    NSString *oldPath = [self.selectedDocument.fileURL path];
+    newName = [[newName stringByAppendingPathExtension:FileExtension]mutableCopy];
+    NSMutableString *newPath = [[oldPath stringByDeletingLastPathComponent] mutableCopy];
+    newPath = [[newPath stringByAppendingPathComponent:newName]mutableCopy];
+    
+    BOOL success = [fileManager moveItemAtPath:oldPath toPath:newPath error:&error];
+    if (!success) {
+        NSLog(@"Failed to move file %@", error.localizedDescription);
+    }
+    else {
+        NSLog(@"file move ok %@", newPath);
+        NSURL *newURL = [NSURL fileURLWithPath:newPath isDirectory:YES];
+        GuideDocument *newGuide = [[GuideDocument alloc]initWithFileURL:newURL];
+        self.selectedDocument = newGuide;
+    }
+    
 }
 
 
@@ -234,27 +277,12 @@
         if ( self.documentsDirectoryPath && ([self.fileList count] > 0) ) {
             // copy name to delete
             NSURL *fileURLToDelete = [self.fileList objectAtIndex:indexPath.row];
+            [self deleteGuide:fileURLToDelete];
             // remove url from file list
             [self.fileList removeObjectAtIndex:indexPath.row];
             // call tableView to remove row
             [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-            // set up file URL
-             if (fileURLToDelete) {
-                __block BOOL removeSuccess = NO;
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                    NSFileCoordinator *fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
-                    [fileCoordinator coordinateWritingItemAtURL:fileURLToDelete options:NSFileCoordinatorWritingForDeleting
-                                                          error:nil byAccessor:^(NSURL* writingURL) {
-                                                              NSFileManager* fileManager = [[NSFileManager alloc] init];
-                                                              NSError *error;
-                                                              removeSuccess = [fileManager removeItemAtPath:[writingURL path] error:&error];
-                                                          }];
-                });
-            }
-            else {
-                NSLog(@"ERROR:  file deletion fileURLToDelete %@", fileURLToDelete);
-            }
-        }
+         }
         else {
             NSLog(@"ERROR: file deletion documentsDirectoryPath = %@, self.fileList = %@", self.documentsDirectoryPath, self.fileList);
         }
@@ -276,8 +304,9 @@
             [self.selectedDocument openWithCompletionHandler:^(BOOL success) {
                 destinationVC.guideDocument = self.selectedDocument;
                 destinationVC.title = [[self.selectedDocument.fileURL lastPathComponent] stringByDeletingPathExtension];
+                destinationVC.delegate = self;
                 // release hold on selected Document now that it's been passed to the document view controller
-                self.selectedDocument = nil;
+               // self.selectedDocument = nil;
                }];
         }
     }
@@ -311,17 +340,31 @@
 
 #pragma mark    Navigation
 
+
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([[segue identifier] isEqualToString:@"showGuide"]) {
-      //  if (self.selectedDocument) {
-            // open the selected document and pass it to the destination document view controller
-            NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-            NSURL *url = self.fileList[indexPath.row];
-             [self prepareGuideDocumentVC:[segue destinationViewController] withURL:url ];
-
-        //    }
+        // open the selected document and pass it to the destination document view controller
+        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+        NSURL *url = self.fileList[indexPath.row];
+        [self prepareGuideDocumentVC:[segue destinationViewController] withURL:url ];
     }
+}
+
+
+#pragma mark GuideDetailViewControllerDelegate
+
+- (void)deleteFileAtURL:(NSURL *)fileURL
+{
+    [self deleteGuide:fileURL];
+    [self refresh];
+
+}
+
+- (void)renameFileAtURL:(NSURL *)fileURL withName:(NSString *)newName
+{
+    [self renameDirectory:newName];
+    [self refresh];
 }
 
 @end

@@ -13,7 +13,7 @@
 
 
 
-@interface GuideDetailViewController ()
+@interface GuideDetailViewController () <UITextViewDelegate>
 
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
 
@@ -76,42 +76,73 @@
 }
 
 
+- (void)checkFileName
+{
+    // check if document name needs to change
+    // document name is the first line of text truncated to 20 characters
+    NSArray *lines = [self.guideTextView.text  componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    NSMutableString *firstLine = [[lines objectAtIndex:0]mutableCopy];   // get the first line
+    if ( [firstLine length] > 20 ) {
+        firstLine = [[firstLine substringToIndex:20]mutableCopy];
+        // remove any trailing white space
+        firstLine = [[firstLine stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]mutableCopy];
+    }
+
+    if (![firstLine isEqualToString:self.guideDocument.localizedName]) {
+        // let delegate change the file name
+        [self.delegate renameFileAtURL:self.guideDocument.fileURL withName:firstLine];
+      }
+}
+
 -(void)saveAndCloseDocument
 {
     [self.guideTextView resignFirstResponder];
     
     // save document
+    GuideDetailViewController *weakSelf = self;
     [self.guideDocument saveToURL: self.guideDocument.fileURL forSaveOperation:UIDocumentSaveForOverwriting completionHandler:^(BOOL success) {
-            // close document
-            dispatch_async(dispatch_get_main_queue(), ^{
-            [self.guideDocument closeWithCompletionHandler:^(BOOL success) {
-                if (!success) {
-                    NSLog(@"Failed to close %@", self.guideDocument.fileURL);
+        // close document
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [weakSelf.guideDocument closeWithCompletionHandler:^(BOOL success) {
+               if (success) {
+                    BOOL emptyText = false;
+                   NSString *documentText = [weakSelf.guideTextView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                    if ([documentText length] <= 0) {
+                        emptyText = true;
+                    }
+                    if (emptyText == false) {
+                        // check if document name needs to change
+                        [weakSelf checkFileName];
+                    }
+                    else {  // emptyText == true
+
+                        // let master tableview know the file needs to be deleted
+                        [weakSelf.delegate deleteFileAtURL:weakSelf.guideDocument.fileURL];
+                    }
+                    weakSelf.guideDocument = nil;
                 }
             }];
-            })
-        ;
+        });
     }];
     
 }
 
 #pragma mark UITextViewDelegate Methods
 
+
 -(void)textViewDidEndEditing:(UITextView *)textView
 {
 
     if (self.guideDocument) {
-    //    NSLog(@"END EDITING");
+        // update the model
         self.guideDocument.text = self.guideTextView.text;
-        [self saveAndCloseDocument ];
-        self.guideDocument = nil;
+        [self saveAndCloseDocument];
     }
 }
 
 -(void)textViewDidBeginEditing:(UITextView *)textView
 {
     if (self.guideDocument) {
-     //   NSLog(@"DID BEGIN EDITING");
         self.guideTextView.text = self.guideDocument.text;
     }
 }
