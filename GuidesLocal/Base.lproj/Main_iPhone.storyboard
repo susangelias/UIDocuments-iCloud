@@ -20,10 +20,10 @@
             </objects>
             <point key="canvasLocation" x="528" y="58"/>
         </scene>
-        <!--Guide Master View Controller - Master-->
+        <!--Documents ListTVC - Master-->
         <scene sceneID="H2g-7m-Iec">
             <objects>
-                <tableViewController title="Master" id="vJk-s1-2jo" customClass="GuideMasterViewController" sceneMemberID="viewController">
+                <tableViewController title="Master" id="vJk-s1-2jo" customClass="DocumentsListTVC" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="arj-Gs-xWA">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -46,9 +46,6 @@
                                     </subviews>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <connections>
-                                    <segue destination="xVe-pz-42J" kind="push" identifier="showGuide" id="nhp-gR-moc"/>
-                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <sections/>
@@ -60,15 +57,18 @@
                     <navigationItem key="navigationItem" title="Guides" id="jd1-fj-nFe">
                         <barButtonItem key="rightBarButtonItem" id="oE0-5w-Jv2"/>
                     </navigationItem>
+                    <connections>
+                        <segue destination="xVe-pz-42J" kind="push" identifier="showGuide" id="HtC-0i-Ihk"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GWt-RX-7Zp" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="985" y="64"/>
         </scene>
-        <!--Guide Detail View Controller-->
+        <!--Document View Controller-->
         <scene sceneID="dQo-Ux-ctK">
             <objects>
-                <viewController id="xVe-pz-42J" customClass="GuideDetailViewController" sceneMemberID="viewController">
+                <viewController id="xVe-pz-42J" customClass="DocumentViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="R7l-Ja-Qp5"/>
                         <viewControllerLayoutGuide type="bottom" id="Smb-1o-TVw"/>

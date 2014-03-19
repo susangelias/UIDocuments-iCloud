@@ -19,6 +19,7 @@
 
 @property (nonatomic, strong) NSString *text;
 @property (nonatomic, weak) id <GuideDocumentDelegate> delegate;
+@property (nonatomic, strong) NSString *guideTitle;
 
 @end
 

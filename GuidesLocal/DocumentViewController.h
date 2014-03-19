@@ -9,19 +9,18 @@
 #import <UIKit/UIKit.h>
 #import "GuideDocument.h"
 
-@interface GuideDetailViewController : UIViewController <GuideDocumentDelegate, UISplitViewControllerDelegate>
+@interface DocumentViewController : UIViewController < UISplitViewControllerDelegate>
 
 @property (strong, nonatomic) GuideDocument *guideDocument;
-
 @property (weak, nonatomic) IBOutlet UITextView *guideTextView;
 @property (strong, nonatomic) id delegate;
 
 @end
 
 
-@protocol GuideDetailViewControllerDelegate <NSObject>
+@protocol DocumentViewControllerDelegate <NSObject>
 
-- (void)deleteFileAtURL: (NSURL *)fileURL;
-- (void)renameFileAtURL: (NSURL *)fileURL withName: (NSString *)newName;
+- (void)documentContentChanged;
+- (void)documentContentEmpty;
 
 @end

@@ -6,11 +6,11 @@
 //  Copyright (c) 2014 GriffTech. All rights reserved.
 //
 
-#import "GuideMasterViewController.h"
-#import "GuideDetailViewController.h"
+#import "DocumentsListTVC.h"
+#import "DocumentViewController.h"
 #import "FileExtension.h"
 
-@interface GuideMasterViewController () <GuideDetailViewControllerDelegate>
+@interface DocumentsListTVC () <DocumentViewControllerDelegate, GuideDocumentDelegate>
 
 @property (nonatomic, strong) NSString *documentsDirectoryPath;
 @property (strong, nonatomic) NSMutableArray *fileList;
@@ -19,7 +19,7 @@
 
 @end
 
-@implementation GuideMasterViewController
+@implementation DocumentsListTVC
 
 - (NSMutableArray *)fileList
 {
@@ -94,7 +94,7 @@
 
     UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
     self.navigationItem.rightBarButtonItem = addButton;
-    self.detailViewController = (GuideDetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
+    self.detailViewController = (DocumentViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
     [self refresh];
     
@@ -141,6 +141,10 @@
     return url;
 }
 
+
+
+
+
 #pragma mark   Guide  File Management Methods
 
 - (void) deleteGuide:(NSURL *)guideURL
@@ -156,6 +160,7 @@
         }
         else {
             NSLog(@"FILE DELETED %@", guideURL);
+            self.selectedDocument = nil;
         }
     }
 }
@@ -178,10 +183,7 @@
     }
     else {
         NSLog(@"file move ok %@", newPath);
-        NSURL *newURL = [NSURL fileURLWithPath:newPath isDirectory:YES];
-        GuideDocument *newGuide = [[GuideDocument alloc]initWithFileURL:newURL];
-        self.selectedDocument = newGuide;
-    }
+     }
     
 }
 
@@ -213,19 +215,19 @@
                               dispatch_async(dispatch_get_main_queue(), ^{
                                   NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
                                   [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-                                  id detail = self.splitViewController.viewControllers[1];
-                                  if (!detail) {
-                                     [self performSegueWithIdentifier:@"showGuide" sender:self];
-                                  }
-                                  else if ([detail isKindOfClass:[UINavigationController class]]) {
+                                 // id detail = self.splitViewController.viewControllers[1];
+                                //  if (!detail) {
+                                  [self performSegueWithIdentifier:@"showGuide" sender:self];
+                               //   }
+                               //   else if ([detail isKindOfClass:[UINavigationController class]]) {
                                           // move past the UINavigation Controller
-                                          detail = [((UINavigationController *)detail).viewControllers firstObject];
+                               //           detail = [((UINavigationController *)detail).viewControllers firstObject];
 
-                                          if ([detail isKindOfClass:[GuideDetailViewController class]]) {
+                                //          if ([detail isKindOfClass:[GuideDetailViewController class]]) {
                                               // update the detail view
-                                              [self prepareGuideDocumentVC:detail withURL:nil];
-                                          }
-                                    }
+                                //              [self prepareGuideDocumentVC:detail withURL:nil];
+                                //          }
+                                 //   }
                               });
                           }
                           
@@ -235,6 +237,26 @@
     
 }
 
+-(void)saveAndCloseDocument
+{
+    // save document
+    [self.selectedDocument saveToURL: self.selectedDocument.fileURL forSaveOperation:UIDocumentSaveForOverwriting completionHandler:^(BOOL success) {
+        // close document
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.selectedDocument closeWithCompletionHandler:^(BOOL success) {
+                if (success) {
+                    // see if file name has changed
+                    if ( (![self.selectedDocument.guideTitle isEqualToString:self.selectedDocument.localizedName]) && (self.selectedDocument.guideTitle) )
+                    {
+                        [self renameDirectory:self.selectedDocument.guideTitle];
+                        [self refresh];
+                    }
+                    self.selectedDocument = nil;
+                }
+            }];
+        });
+    }];
+}
 
 #pragma mark - Table View Data Source
 
@@ -267,8 +289,8 @@
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         // on the iPad, unlink this document from the detail view controller
-        if ([self.detailViewController isKindOfClass:[GuideDetailViewController class]]) {
-            GuideDetailViewController *guideDVC = self.detailViewController;
+        if ([self.detailViewController isKindOfClass:[DocumentViewController class]]) {
+            DocumentViewController *guideDVC = self.detailViewController;
             guideDVC.guideDocument = nil;
             guideDVC.title = @"";
         }
@@ -293,21 +315,20 @@
 }
 
 
-- (void) prepareGuideDocumentVC:(GuideDetailViewController *)destinationVC
-                        withURL: (NSURL *)url
+- (void) prepareGuideDocumentVCWithURL: (NSURL *)url
 {
     if (url) {
         self.selectedDocument = [[GuideDocument alloc]initWithFileURL:url];
+        self.selectedDocument.delegate   = self;
     }
     if (self.selectedDocument) {
         if (self.selectedDocument.documentState & UIDocumentStateClosed) {
             [self.selectedDocument openWithCompletionHandler:^(BOOL success) {
-                destinationVC.guideDocument = self.selectedDocument;
-                destinationVC.title = [[self.selectedDocument.fileURL lastPathComponent] stringByDeletingPathExtension];
-                destinationVC.delegate = self;
-                // release hold on selected Document now that it's been passed to the document view controller
-               // self.selectedDocument = nil;
-               }];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self performSegueWithIdentifier:@"showGuide" sender:self];
+                });
+
+            }];
         }
     }
 
@@ -317,23 +338,24 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // get the Detail view controller in our UISplitViewController (nil if not in one)
+    /*
+    GuideDetailViewController *destinationVC;
     id detail = self.splitViewController.viewControllers[1];
     if (detail) {
         // if Detail is a UINavigationController, look at its root view controller to find it
         if ([detail isKindOfClass:[UINavigationController class]]) {
             detail = [((UINavigationController *)detail).viewControllers firstObject];
-        }
-        // is the Detail is an GuideDetailViewController?
-        if ([detail isKindOfClass:[GuideDetailViewController class]]) {
-            // yes ... we know how to update that!
-            GuideDetailViewController *destinationVC = (GuideDetailViewController *)detail;
-            // on the iPad, need to terminate the previous editing session when the user taps on the left view controller's table cells
-            [destinationVC.guideTextView resignFirstResponder];
-            NSURL *url = self.fileList[indexPath.row];
-            [self prepareGuideDocumentVC:destinationVC withURL:url];
-
+            // is the Detail is an GuideDetailViewController?
+            if ([detail isKindOfClass:[GuideDetailViewController class]]) {
+                destinationVC = (GuideDetailViewController *)detail;
+                // on the iPad, need to terminate the previous editing session when the user taps on the left view controller's table cells
+                [destinationVC.guideTextView resignFirstResponder];
+            }
         }
     }
+     */
+    NSURL *url = self.fileList[indexPath.row];
+    [self prepareGuideDocumentVCWithURL:url];
 }
 
 
@@ -345,26 +367,41 @@
 {
     if ([[segue identifier] isEqualToString:@"showGuide"]) {
         // open the selected document and pass it to the destination document view controller
-        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        NSURL *url = self.fileList[indexPath.row];
-        [self prepareGuideDocumentVC:[segue destinationViewController] withURL:url ];
+        DocumentViewController *destinationVC;
+        if ([[segue destinationViewController] isKindOfClass:[DocumentViewController class]])
+        {
+            destinationVC = (DocumentViewController *)[segue destinationViewController];
+        }
+        destinationVC.guideDocument = self.selectedDocument;
+        destinationVC.title = [[self.selectedDocument.fileURL lastPathComponent] stringByDeletingPathExtension];
+        destinationVC.delegate = self;
     }
 }
 
 
-#pragma mark GuideDetailViewControllerDelegate
+#pragma mark DocumentViewControllerDelegate
 
-- (void)deleteFileAtURL:(NSURL *)fileURL
+- (void)documentContentChanged
 {
-    [self deleteGuide:fileURL];
+    [self saveAndCloseDocument];
+}
+
+- (void)documentContentEmpty
+{
+    [self deleteGuide:self.selectedDocument.fileURL];
     [self refresh];
 
 }
 
-- (void)renameFileAtURL:(NSURL *)fileURL withName:(NSString *)newName
+
+
+#pragma mark GuideDocumentDelegate Methods
+
+-(void) guideDocumentContentsUpdated:(GuideDocument *)guideDocument
 {
-    [self renameDirectory:newName];
-    [self refresh];
+    //  NSLog(@"CONTENTS UPDATED");
+    self.selectedDocument.text =  guideDocument.text;
 }
+
 
 @end

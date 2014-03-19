@@ -22,8 +22,8 @@
 		C0FBA9AC18CA5FAA00BA97F3 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0FBA98818CA5FAA00BA97F3 /* UIKit.framework */; };
 		C0FBA9B418CA5FAA00BA97F3 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C0FBA9B218CA5FAA00BA97F3 /* InfoPlist.strings */; };
 		C0FBA9B618CA5FAA00BA97F3 /* GuidesLocalTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9B518CA5FAA00BA97F3 /* GuidesLocalTests.m */; };
-		C0FBA9C118CA606100BA97F3 /* GuideMasterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9C018CA606100BA97F3 /* GuideMasterViewController.m */; };
-		C0FBA9C418CA609700BA97F3 /* GuideDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9C318CA609700BA97F3 /* GuideDetailViewController.m */; };
+		C0FBA9C118CA606100BA97F3 /* DocumentsListTVC.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9C018CA606100BA97F3 /* DocumentsListTVC.m */; };
+		C0FBA9C418CA609700BA97F3 /* DocumentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9C318CA609700BA97F3 /* DocumentViewController.m */; };
 		C0FBA9CA18CA610000BA97F3 /* GuideDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = C0FBA9C918CA610000BA97F3 /* GuideDocument.m */; };
 /* End PBXBuildFile section */
 
@@ -57,10 +57,10 @@
 		C0FBA9B118CA5FAA00BA97F3 /* GuidesLocalTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GuidesLocalTests-Info.plist"; sourceTree = "<group>"; };
 		C0FBA9B318CA5FAA00BA97F3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C0FBA9B518CA5FAA00BA97F3 /* GuidesLocalTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GuidesLocalTests.m; sourceTree = "<group>"; };
-		C0FBA9BF18CA606100BA97F3 /* GuideMasterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuideMasterViewController.h; sourceTree = "<group>"; };
-		C0FBA9C018CA606100BA97F3 /* GuideMasterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GuideMasterViewController.m; sourceTree = "<group>"; };
-		C0FBA9C218CA609700BA97F3 /* GuideDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuideDetailViewController.h; sourceTree = "<group>"; };
-		C0FBA9C318CA609700BA97F3 /* GuideDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GuideDetailViewController.m; sourceTree = "<group>"; };
+		C0FBA9BF18CA606100BA97F3 /* DocumentsListTVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocumentsListTVC.h; sourceTree = "<group>"; };
+		C0FBA9C018CA606100BA97F3 /* DocumentsListTVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DocumentsListTVC.m; sourceTree = "<group>"; };
+		C0FBA9C218CA609700BA97F3 /* DocumentViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocumentViewController.h; sourceTree = "<group>"; };
+		C0FBA9C318CA609700BA97F3 /* DocumentViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DocumentViewController.m; sourceTree = "<group>"; };
 		C0FBA9C818CA610000BA97F3 /* GuideDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuideDocument.h; sourceTree = "<group>"; };
 		C0FBA9C918CA610000BA97F3 /* GuideDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GuideDocument.m; sourceTree = "<group>"; };
 		C0FBA9CB18CA610B00BA97F3 /* FileExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileExtension.h; sourceTree = "<group>"; };
@@ -174,10 +174,10 @@
 		C0FBA9C618CA60CA00BA97F3 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				C0FBA9C218CA609700BA97F3 /* GuideDetailViewController.h */,
-				C0FBA9C318CA609700BA97F3 /* GuideDetailViewController.m */,
-				C0FBA9BF18CA606100BA97F3 /* GuideMasterViewController.h */,
-				C0FBA9C018CA606100BA97F3 /* GuideMasterViewController.m */,
+				C0FBA9C218CA609700BA97F3 /* DocumentViewController.h */,
+				C0FBA9C318CA609700BA97F3 /* DocumentViewController.m */,
+				C0FBA9BF18CA606100BA97F3 /* DocumentsListTVC.h */,
+				C0FBA9C018CA606100BA97F3 /* DocumentsListTVC.m */,
 				C0FBA99318CA5FAA00BA97F3 /* GuidesLocalAppDelegate.h */,
 				C0FBA99418CA5FAA00BA97F3 /* GuidesLocalAppDelegate.m */,
 			);
@@ -296,9 +296,9 @@
 			files = (
 				C0FBA99118CA5FAA00BA97F3 /* main.m in Sources */,
 				C0FBA9CA18CA610000BA97F3 /* GuideDocument.m in Sources */,
-				C0FBA9C418CA609700BA97F3 /* GuideDetailViewController.m in Sources */,
+				C0FBA9C418CA609700BA97F3 /* DocumentViewController.m in Sources */,
 				C0FBA99518CA5FAA00BA97F3 /* GuidesLocalAppDelegate.m in Sources */,
-				C0FBA9C118CA606100BA97F3 /* GuideMasterViewController.m in Sources */,
+				C0FBA9C118CA606100BA97F3 /* DocumentsListTVC.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

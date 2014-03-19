@@ -8,10 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@class GuideDetailViewController;
+@class DocumentViewController;
 
-@interface GuideMasterViewController : UITableViewController
+@interface DocumentsListTVC : UITableViewController
 
-@property (strong, nonatomic) GuideDetailViewController *detailViewController;
+@property (strong, nonatomic) DocumentViewController *detailViewController;
 
 @end
