@@ -66,7 +66,6 @@
 - (UIImage *)image  {
     if (_image == nil) {
         if (self.fileWrapper != nil) {
-         //   NSLog(@"Loading _image for %@...", self.fileURL);
             _image = [self decodeObjectFromWrapperWithPreferredFilename:self.imageFileName];
         } else {
             _image = [[UIImage alloc] init];
@@ -79,7 +78,6 @@
 - (NSString *)text {
     if (!_text) {
         if (self.fileWrapper != nil) {
-         //   NSLog(@"Loading instruction for %@...", self.fileURL);
             _text = [self decodeObjectFromWrapperWithPreferredFilename:self.textFileName];
         } else {
             _text = [[NSString alloc] init];
@@ -89,18 +87,25 @@
 }
 
 - (BOOL)loadFromContents:(id)contents ofType:(NSString *)typeName error:(NSError *__autoreleasing *)outError {
+  
+    BOOL retVal = YES;
     
     self.fileWrapper = (NSFileWrapper *) contents;
+    
+    // CHECK FOR EMPTY FILE
+    if ((![self.text respondsToSelector:@selector(isEqualToString:)]) || [self.text isEqualToString:@""]) {
+        retVal = NO;
+    }
     
     // The rest will be lazy loaded...
     self.text = nil;
     self.image = nil;
- 
+    
     if ([self.delegate respondsToSelector:@selector(guideDocumentContentsUpdated:)]) {
         [self.delegate guideDocumentContentsUpdated:self];
-    }
-    
-    return YES;
+        }
+
+    return retVal;
     
 }
 

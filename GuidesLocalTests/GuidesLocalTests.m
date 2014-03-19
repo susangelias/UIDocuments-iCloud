@@ -191,4 +191,98 @@
     XCTAssertFalse(blockSuccess, @"");
     
 }
+
+// Load file has bad data
+- (void)testLoadingBadDataFile
+{
+    // file is present but has bad data
+    // create the document with an image saved in the text file
+    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    document.text = (NSString *)[UIImage imageNamed:@"stop.png"];
+    
+    __block BOOL blockSuccess;
+    
+    // Save the document
+    [document saveToURL:self.documentURL
+       forSaveOperation:UIDocumentSaveForCreating
+      completionHandler:^(BOOL success) {
+          blockSuccess = success;
+          [self blockCalled];
+      }];
+    
+    XCTAssertTrue([self blockCalledWithin:10], @"");
+    XCTAssertTrue(blockSuccess, @"");
+    
+    // close the document
+    [document closeWithCompletionHandler:^(BOOL success) {
+        blockSuccess = success;
+        [self blockCalled];
+    }];
+    
+    XCTAssertTrue([self blockCalledWithin:10], @"");
+    XCTAssertTrue(blockSuccess, @"");
+    
+    // Load the document back in
+    GuideDocument *loadedDocument = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    [loadedDocument openWithCompletionHandler:^(BOOL success) {
+        blockSuccess = success;
+        [self blockCalled];
+    }];
+    
+    // then the completion block should be called but with a failure indication
+    XCTAssertTrue([self blockCalledWithin:10], @"");
+    XCTAssertFalse(blockSuccess, @"");
+   
+}
+
+// Load file has bad data
+- (void)testExceptionDuringUnarchiveShouldFailGracefully {
+    // file is present but has  data that will throw an exception during Unarchiving
+    // create the document with an array of images
+     UIImage *explodingObject = [[UIImage alloc]init];
+     explodingObject = [UIImage imageNamed:@"stop.png"];
+     NSArray *array = [NSArray arrayWithObjects:explodingObject, nil];
+     NSMutableData *data = [[NSMutableData alloc]init];
+     NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc]initForWritingWithMutableData:data];
+    [archiver encodeObject:array forKey:@"array"];
+    [archiver finishEncoding];
+    
+    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    [data writeToFile:self.documentName atomically:YES];
+    
+    __block BOOL blockSuccess;
+    
+    // Save the document
+    [document saveToURL:self.documentURL
+       forSaveOperation:UIDocumentSaveForCreating
+      completionHandler:^(BOOL success) {
+          blockSuccess = success;
+          [self blockCalled];
+      }];
+    
+    XCTAssertTrue([self blockCalledWithin:10], @"");
+    XCTAssertTrue(blockSuccess, @"");
+    
+    // close the document
+    [document closeWithCompletionHandler:^(BOOL success) {
+        blockSuccess = success;
+        [self blockCalled];
+    }];
+    
+    XCTAssertTrue([self blockCalledWithin:10], @"");
+    XCTAssertTrue(blockSuccess, @"");
+    
+    // Load the document back in
+    GuideDocument *loadedDocument = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    [loadedDocument openWithCompletionHandler:^(BOOL success) {
+        blockSuccess = success;
+        [self blockCalled];
+    }];
+    
+    // then the completion block should be called but with a failure indication
+    XCTAssertTrue([self blockCalledWithin:10], @"");
+    XCTAssertFalse(blockSuccess, @"");
+    
+}
+
 @end
