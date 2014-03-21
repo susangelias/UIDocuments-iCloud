@@ -8,20 +8,26 @@
 
 #import <XCTest/XCTest.h>
 #import "GuideDocument.h"
+#import "DocumentsListTVC.h"
+#import "DocumentViewController.h"
 #import "FileExtension.h"
 
 @interface parsedGuideDocumentTest : XCTestCase
 
 @property (nonatomic, strong) NSString *documentsDirectoryPath;
 @property (nonatomic, strong) NSString *documentName;
-@property (nonatomic, strong) NSURL *documentURL;
+@property (nonatomic, strong) NSString *documentNameWithExtn;
+@property (nonatomic, strong) NSURL *documentFileURL;
 @property (nonatomic, strong) GuideDocument *testDocument;
 @property (nonatomic, strong) NSFileManager *fileManager;
 
 @end
 
-#define kUnitTestFileName   @"TestGuide.spkn"
+//#define kUnitTestFileName   @"TestGuide.spkn"
 #define kDocumentTestText   @"Something there is that doesn't love a wall"
+#define POLL_INTERVAL 0.05 //50ms
+#define N_SEC_TO_POLL 1.0 //poll for 1s
+#define MAX_POLL_COUNT N_SEC_TO_POLL / POLL_INTERVAL
 
 @implementation parsedGuideDocumentTest
 {
@@ -35,13 +41,19 @@
     self.documentsDirectoryPath = [NSSearchPathForDirectoriesInDomains( NSDocumentDirectory,
                                                                        NSUserDomainMask, YES ) objectAtIndex:0];
     
-    self.documentName = [self.documentsDirectoryPath stringByAppendingPathComponent:kUnitTestFileName];
-    self.documentURL = [NSURL fileURLWithPath:self.documentName];
+    self.documentName = [self.documentsDirectoryPath stringByAppendingPathComponent:kGenericFileName];
+    self.documentNameWithExtn = [self.documentName stringByAppendingPathExtension:FileExtension];
+    self.documentFileURL = [NSURL fileURLWithPath:self.documentNameWithExtn];
     
     self.fileManager = [NSFileManager defaultManager];
-    [self.fileManager removeItemAtURL:self.documentURL error:NULL];
+    [self.fileManager removeItemAtURL:self.documentFileURL error:NULL];
     
     _blockCalled = NO;
+}
+
+- (void)tearDown
+{
+    [self.fileManager removeItemAtURL:self.documentFileURL error:NULL];
 }
 
 - (void)blockCalled
@@ -65,37 +77,55 @@
 }
 
 
-// CREATING AND SAVING FILE
--(void)testSavingCreatesFile
+- (void)testinsertNewObject
 {
-    GuideDocument *documentUnderTest = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    UIApplication *myApp = [UIApplication sharedApplication];
+    UINavigationController *masterNavC = (UINavigationController *)[myApp.keyWindow rootViewController];
+    DocumentsListTVC *masterTVC = (DocumentsListTVC *)[masterNavC topViewController];
+    __block BOOL done = NO;
     
-    __block BOOL blockSuccess;
-    [documentUnderTest saveToURL:self.documentURL
-                forSaveOperation:UIDocumentSaveForCreating
-               completionHandler:^(BOOL success) {
-                   blockSuccess = success;
-                   [self blockCalled];
-               }];
+    // get initial number of files
+    NSUInteger initialNumberOfFiles = [masterTVC.fileList count];
+    // call the button press to be tested - this is asynchronous
+    [masterTVC insertNewObject:nil];
+  
+    float delayInSeconds = 0.5;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+    dispatch_after(popTime, dispatch_get_main_queue(), ^{
+        // check if the file was created and in the correct state
+        XCTAssertEqual(initialNumberOfFiles+1, [masterTVC.fileList count], @"");
+        XCTAssertTrue([self.fileManager fileExistsAtPath:self.documentNameWithExtn], @"" );
+        done = YES;
+    });
+ 
+    NSUInteger pollCount = 0;
     
-    XCTAssertTrue([self blockCalledWithin:10], @"");
+    while (done == NO && pollCount < MAX_POLL_COUNT) {
+        NSLog(@"polling... %i", pollCount);
+        NSDate* untilDate = [NSDate dateWithTimeIntervalSinceNow:POLL_INTERVAL];
+        [[NSRunLoop currentRunLoop] runUntilDate:untilDate];
+        pollCount++;
+    }
+    if (pollCount == MAX_POLL_COUNT) {
+        XCTFail(@"polling timed out");
+    }
     
-    // Save operation should succeed
-    XCTAssertTrue( blockSuccess, @"");
-    XCTAssertTrue([self.fileManager fileExistsAtPath:self.documentName], @"" );
+
 }
+
+
 
 // READING FILE DATA
 - (void) testLoadingRetrievesData
 {
     // create the document with text
-    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentFileURL];
     document.text = kDocumentTestText;
     
     __block BOOL blockSuccess = NO;
     
     // Save the document
-    [document saveToURL:self.documentURL
+    [document saveToURL:self.documentFileURL
        forSaveOperation:UIDocumentSaveForCreating
       completionHandler:^(BOOL success) {
           blockSuccess = success;
@@ -115,7 +145,7 @@
     XCTAssertTrue(blockSuccess, @"");
 
     // Load the document back in
-    GuideDocument *loadedDocument = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    GuideDocument *loadedDocument = [[GuideDocument alloc]initWithFileURL:self.documentFileURL];
     [loadedDocument openWithCompletionHandler:^(BOOL success) {
         blockSuccess = success;
         [self blockCalled];
@@ -136,7 +166,7 @@
     // when we load a new document from that file
     __block BOOL blockSuccess;
     
-    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentFileURL];
     [document openWithCompletionHandler:^(BOOL success) {
         blockSuccess = success;
         [self blockCalled];
@@ -153,14 +183,14 @@
 {
     // file is present but empty
     // create the document with text
-    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentFileURL];
     document.text = @"";
-    NSLog(@"fileURL %@", self.documentURL);
+    NSLog(@"fileURL %@", self.documentFileURL);
     
     __block BOOL blockSuccess;
     
     // Save the document
-    [document saveToURL:self.documentURL
+    [document saveToURL:self.documentFileURL
        forSaveOperation:UIDocumentSaveForCreating
       completionHandler:^(BOOL success) {
           blockSuccess = success;
@@ -180,7 +210,7 @@
     XCTAssertTrue(blockSuccess, @"");
     
     // Load the document back in
-    GuideDocument *loadedDocument = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    GuideDocument *loadedDocument = [[GuideDocument alloc]initWithFileURL:self.documentFileURL];
     [loadedDocument openWithCompletionHandler:^(BOOL success) {
         blockSuccess = success;
         [self blockCalled];
@@ -197,13 +227,13 @@
 {
     // file is present but has bad data
     // create the document with an image saved in the text file
-    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentFileURL];
     document.text = (NSString *)[UIImage imageNamed:@"stop.png"];
     
     __block BOOL blockSuccess;
     
     // Save the document
-    [document saveToURL:self.documentURL
+    [document saveToURL:self.documentFileURL
        forSaveOperation:UIDocumentSaveForCreating
       completionHandler:^(BOOL success) {
           blockSuccess = success;
@@ -223,7 +253,7 @@
     XCTAssertTrue(blockSuccess, @"");
     
     // Load the document back in
-    GuideDocument *loadedDocument = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    GuideDocument *loadedDocument = [[GuideDocument alloc]initWithFileURL:self.documentFileURL];
     [loadedDocument openWithCompletionHandler:^(BOOL success) {
         blockSuccess = success;
         [self blockCalled];
@@ -247,13 +277,13 @@
     [archiver encodeObject:array forKey:@"array"];
     [archiver finishEncoding];
     
-    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentFileURL];
     [data writeToFile:self.documentName atomically:YES];
     
     __block BOOL blockSuccess;
     
     // Save the document
-    [document saveToURL:self.documentURL
+    [document saveToURL:self.documentFileURL
        forSaveOperation:UIDocumentSaveForCreating
       completionHandler:^(BOOL success) {
           blockSuccess = success;
@@ -273,7 +303,7 @@
     XCTAssertTrue(blockSuccess, @"");
     
     // Load the document back in
-    GuideDocument *loadedDocument = [[GuideDocument alloc]initWithFileURL:self.documentURL];
+    GuideDocument *loadedDocument = [[GuideDocument alloc]initWithFileURL:self.documentFileURL];
     [loadedDocument openWithCompletionHandler:^(BOOL success) {
         blockSuccess = success;
         [self blockCalled];
@@ -284,5 +314,7 @@
     XCTAssertFalse(blockSuccess, @"");
     
 }
+
+
 
 @end
