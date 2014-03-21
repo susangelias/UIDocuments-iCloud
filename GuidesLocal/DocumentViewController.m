@@ -45,7 +45,6 @@
 {
     [super viewWillDisappear:animated];
     self.guideDocument = nil;
- //   NSLog(@"viewWillDisapper");
 }
 
 #pragma mark SplitViewController Delegate
@@ -101,21 +100,17 @@
 }
 
 
-
-
 #pragma mark UITextViewDelegate Methods
 
 
 -(void)textViewDidEndEditing:(UITextView *)textView
 {
-    if (self.guideDocument) {
-     //    [self.guideTextView resignFirstResponder];
-        
+    if (self.guideDocument) {        
         // check if there is any text
         NSString *documentText = [self.guideTextView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         if ([documentText isEqualToString:@""]) {
             // don't save documents without content, let the delegate know
-            [self.delegate documentContentEmpty];
+            [self.delegate documentContentEmpty:self.guideDocument.fileURL];
         }
         else {
             // update the model
@@ -125,19 +120,16 @@
             [self checkFileName];
             
             // let delegate know the document content has changed
-            if (self.guideDocument.documentState == UIDocumentStateNormal) {
+            if (!self.guideDocument.documentState & UIDocumentStateNormal) {
+                NSLog(@"documentState = %d", self.guideDocument.documentState);
+            }
+            else {
                 [self.delegate documentContentChanged];
             }
         }
     }
 }
 
--(void)textViewDidBeginEditing:(UITextView *)textView
-{
-    if (self.guideDocument) {
-        self.guideTextView.text = self.guideDocument.text;
-    }
-}
 
 
 

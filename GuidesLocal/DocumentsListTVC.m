@@ -13,11 +13,11 @@
 @interface DocumentsListTVC () <DocumentViewControllerDelegate, GuideDocumentDelegate>
 
 @property (nonatomic, strong) NSString *documentsDirectoryPath;
-@property (strong, nonatomic) NSMutableArray *fileList;
-@property (nonatomic, strong) GuideDocument *selectedDocument;
 @property  BOOL iCloudOn;
 
 @end
+
+
 
 @implementation DocumentsListTVC
 
@@ -25,6 +25,7 @@
 {
     if (!_fileList) {
         _fileList = [[NSMutableArray alloc]init];
+        [self loadLocal];
     }
     return _fileList;
 }
@@ -92,8 +93,8 @@
 	// Do any additional setup after loading the view, typically from a nib.
     self.navigationItem.leftBarButtonItem = self.editButtonItem;
 
-    UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
-    self.navigationItem.rightBarButtonItem = addButton;
+ //   UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
+ //   self.navigationItem.rightBarButtonItem = addButton;
     self.detailViewController = (DocumentViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
     [self refresh];
@@ -127,7 +128,7 @@
     NSURL *url = nil;
     NSString *guideName = nil;
     
-    guideName = [NSString stringWithFormat:@"Guide %@", [NSDate date]];
+    guideName = kGenericFileName;
     
     NSString *textFileNameWithExtention = [NSString stringWithFormat:@"%@.%@", guideName, FileExtension];
     
@@ -161,14 +162,16 @@
         else {
             NSLog(@"FILE DELETED %@", guideURL);
             self.selectedDocument = nil;
+            self.detailViewController.guideDocument = nil;
         }
     }
 }
 
 
-- (void)renameDirectory: (NSString *)newName
+- (NSURL *)renameDirectory: (NSString *)newName
 {
     // change the file name by moving the file
+    NSURL *renamedFileURL = [[NSURL alloc]init];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSError *error = nil;
     
@@ -182,14 +185,16 @@
         NSLog(@"Failed to move file %@", error.localizedDescription);
     }
     else {
-        NSLog(@"file move ok %@", newPath);
-     }
+        renamedFileURL = [NSURL fileURLWithPath:newPath];
+    }
+    return renamedFileURL;
     
 }
 
-
-- (void)insertNewObject:(id)sender
-{
+- (IBAction)insertNewObject:(UIBarButtonItem *)sender {
+    
+    __block BOOL blockSuccess = YES;
+    
     // Create a new instance of the appropriate class,
     NSURL *url = [self getDocURL];
     
@@ -206,15 +211,15 @@
                        forSaveOperation:UIDocumentSaveForCreating
                       completionHandler:^(BOOL success) {
                           if (success) {
-                              //  NSLog(@"created document %@", newGuide.localizedName);
+                              blockSuccess = success;
                               // insert it into the array,
                               [self.fileList insertObject:self.selectedDocument.fileURL atIndex:0];
                               
                               // and add a new row to the table view.
                               // updating UI so make sure on main queue
                               dispatch_async(dispatch_get_main_queue(), ^{
-                                  NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-                                  [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                                NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+                                [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                                  // id detail = self.splitViewController.viewControllers[1];
                                 //  if (!detail) {
                                   [self performSegueWithIdentifier:@"showGuide" sender:self];
@@ -234,28 +239,75 @@
                       }];
         }
     }
-    
-}
+  }
 
 -(void)saveAndCloseDocument
 {
     // save document
-    [self.selectedDocument saveToURL: self.selectedDocument.fileURL forSaveOperation:UIDocumentSaveForOverwriting completionHandler:^(BOOL success) {
-        // close document
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.selectedDocument closeWithCompletionHandler:^(BOOL success) {
-                if (success) {
-                    // see if file name has changed
-                    if ( (![self.selectedDocument.guideTitle isEqualToString:self.selectedDocument.localizedName]) && (self.selectedDocument.guideTitle) )
-                    {
-                        [self renameDirectory:self.selectedDocument.guideTitle];
-                        [self refresh];
-                    }
-                    self.selectedDocument = nil;
-                }
-            }];
-        });
-    }];
+    GuideDocument *documentToClose;
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        documentToClose = self.detailViewController.guideDocument;
+    }
+    else {
+        documentToClose = self.selectedDocument;
+    }
+    DocumentsListTVC *weakSelf = self;
+    // save the document
+    [documentToClose saveToURL:documentToClose.fileURL
+              forSaveOperation:UIDocumentSaveForOverwriting
+             completionHandler:^(BOOL success) {
+                 if (success) {
+                     // close document
+                     [documentToClose closeWithCompletionHandler:^(BOOL success) {
+                         if (success) {
+                             // see if file name has changed
+                             NSLog(@"CLOSE SUCCESS doc state = %d", weakSelf.selectedDocument.documentState);
+                             if ( (![documentToClose.guideTitle isEqualToString:documentToClose.localizedName]) && (documentToClose.guideTitle) )
+                             {
+                                 // get index into file list for this item
+                                 NSInteger tableItemToRenameIndex = [weakSelf.fileList indexOfObject:documentToClose.fileURL];
+                                 // delete cell from file list
+                                 [weakSelf.fileList removeObjectAtIndex:tableItemToRenameIndex];
+                                 // get cell in table view for this item
+                                 NSIndexPath *indexPath = [NSIndexPath indexPathForRow:tableItemToRenameIndex inSection:0];
+                                 // delete item from table view
+                                 [weakSelf.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:YES];
+                                 
+                                 // rename the file
+                                 NSURL *renamedFileURL = [weakSelf renameDirectory:documentToClose.guideTitle];
+                                 
+                                 if (renamedFileURL) {
+                                     NSLog(@"rename sucess document state from old doc ptr = %d", weakSelf.selectedDocument.documentState);
+                                     // add new url into file list at the end
+                                     [weakSelf.fileList addObject:renamedFileURL];
+                                     // resort file list alphabetically
+                                     [weakSelf.fileList sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+                                         NSString *f1 = [(NSURL *)obj1 absoluteString];
+                                         NSString *f2 = [(NSURL *)obj2 absoluteString];
+                                         return [f1 localizedStandardCompare:f2];
+                                     }];
+                                     // tell our table view to refresh
+                                     [weakSelf.tableView reloadData];
+                                     weakSelf.selectedDocument = nil;
+                                     // instantiate renamed document
+                                     weakSelf.selectedDocument = [[GuideDocument alloc]initWithFileURL:renamedFileURL];
+                                     NSLog(@"renamed doc state %d", weakSelf.selectedDocument.documentState);
+                                     
+                                 }
+                             }
+                             // remove document text from diplay ?
+                             //  weakSelf.selectedDocument = nil;
+                             //  weakSelf.detailViewController.guideDocument = nil;
+                         }
+                     }];
+                     
+                 }
+                 else {
+                     NSLog(@"ERROR SAVING DOCUMENT %@", documentToClose.fileURL);
+                 }
+             }];
+   
+
 }
 
 #pragma mark - Table View Data Source
@@ -294,7 +346,6 @@
             guideDVC.guideDocument = nil;
             guideDVC.title = @"";
         }
-        self.selectedDocument = nil;
         // delete the document file
         if ( self.documentsDirectoryPath && ([self.fileList count] > 0) ) {
             // copy name to delete
@@ -314,19 +365,31 @@
     }
 }
 
+#pragma mark    Navigation
 
 - (void) prepareGuideDocumentVCWithURL: (NSURL *)url
 {
     if (url) {
+        // release our current document
+     //   self.selectedDocument = nil;
         self.selectedDocument = [[GuideDocument alloc]initWithFileURL:url];
+        NSLog(@"prepareGuideDocumentVCWithURL DOCSTATE = %d", self.selectedDocument.documentState);
         self.selectedDocument.delegate   = self;
     }
     if (self.selectedDocument) {
         if (self.selectedDocument.documentState & UIDocumentStateClosed) {
             [self.selectedDocument openWithCompletionHandler:^(BOOL success) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self performSegueWithIdentifier:@"showGuide" sender:self];
-                });
+                if (success) {
+                    if ( (self.detailViewController) && ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) ) {
+                        [self setupDestinationVC:self.detailViewController];
+                    }
+                    else {
+                        [self performSegueWithIdentifier:@"showGuide" sender:self];
+                    }
+                }
+                else {
+                    NSLog(@"document open error %@, %d", self.selectedDocument.fileURL, self.selectedDocument.documentState);
+                }
 
             }];
         }
@@ -334,33 +397,24 @@
 
 }
 
+- (void) setupDestinationVC:(DocumentViewController *)destinationVC
+{
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        [destinationVC.guideTextView resignFirstResponder];     // SAVE ANY CHANGES TO THE CURRENT EDITING SESSION BEFORE OVERWRITING TEXT
+    }
+    destinationVC.guideDocument = self.selectedDocument;
+    destinationVC.title = [[self.selectedDocument.fileURL lastPathComponent] stringByDeletingPathExtension];
+    destinationVC.delegate = self;
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        destinationVC.guideTextView.text = self.selectedDocument.text;
+    }
+}
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    // get the Detail view controller in our UISplitViewController (nil if not in one)
-    /*
-    GuideDetailViewController *destinationVC;
-    id detail = self.splitViewController.viewControllers[1];
-    if (detail) {
-        // if Detail is a UINavigationController, look at its root view controller to find it
-        if ([detail isKindOfClass:[UINavigationController class]]) {
-            detail = [((UINavigationController *)detail).viewControllers firstObject];
-            // is the Detail is an GuideDetailViewController?
-            if ([detail isKindOfClass:[GuideDetailViewController class]]) {
-                destinationVC = (GuideDetailViewController *)detail;
-                // on the iPad, need to terminate the previous editing session when the user taps on the left view controller's table cells
-                [destinationVC.guideTextView resignFirstResponder];
-            }
-        }
-    }
-     */
     NSURL *url = self.fileList[indexPath.row];
     [self prepareGuideDocumentVCWithURL:url];
 }
-
-
-
-#pragma mark    Navigation
 
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -372,9 +426,7 @@
         {
             destinationVC = (DocumentViewController *)[segue destinationViewController];
         }
-        destinationVC.guideDocument = self.selectedDocument;
-        destinationVC.title = [[self.selectedDocument.fileURL lastPathComponent] stringByDeletingPathExtension];
-        destinationVC.delegate = self;
+        [self setupDestinationVC:destinationVC];
     }
 }
 
@@ -386,10 +438,18 @@
     [self saveAndCloseDocument];
 }
 
-- (void)documentContentEmpty
+- (void)documentContentEmpty:(NSURL *)fileURL
 {
-    [self deleteGuide:self.selectedDocument.fileURL];
-    [self refresh];
+    // remove url from file list
+    NSInteger tableItemToDeleteIndex = [self.fileList indexOfObject:fileURL];
+    [self.fileList removeObjectAtIndex:tableItemToDeleteIndex];   // call tableView to remove row
+
+    // remove document name from table view
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:tableItemToDeleteIndex inSection:0];
+    [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    
+    // delete document
+    [self deleteGuide:fileURL];
 
 }
 

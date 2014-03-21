@@ -21,6 +21,6 @@
 @protocol DocumentViewControllerDelegate <NSObject>
 
 - (void)documentContentChanged;
-- (void)documentContentEmpty;
+- (void)documentContentEmpty: (NSURL *)fileURL;
 
 @end

@@ -55,7 +55,11 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Guides" id="jd1-fj-nFe">
-                        <barButtonItem key="rightBarButtonItem" id="oE0-5w-Jv2"/>
+                        <barButtonItem key="rightBarButtonItem" title="Item" systemItem="add" id="KKc-vP-wn0">
+                            <connections>
+                                <action selector="insertNewObject:" destination="vJk-s1-2jo" id="4L0-tQ-DTe"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <segue destination="xVe-pz-42J" kind="push" identifier="showGuide" id="HtC-0i-Ihk"/>
