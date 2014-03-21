@@ -80,7 +80,14 @@
 - (void)testinsertNewObject
 {
     UIApplication *myApp = [UIApplication sharedApplication];
-    UINavigationController *masterNavC = (UINavigationController *)[myApp.keyWindow rootViewController];
+    UINavigationController *masterNavC;
+    if ([[myApp.keyWindow rootViewController] isKindOfClass:[UISplitViewController class]]) {
+        UISplitViewController *masterSplitVC = (UISplitViewController *)[myApp.keyWindow rootViewController];
+        masterNavC = (UINavigationController *)[masterSplitVC.viewControllers objectAtIndex:0];
+    }
+    else {
+        masterNavC = (UINavigationController *)[myApp.keyWindow rootViewController];
+    }
     DocumentsListTVC *masterTVC = (DocumentsListTVC *)[masterNavC topViewController];
     __block BOOL done = NO;
     
