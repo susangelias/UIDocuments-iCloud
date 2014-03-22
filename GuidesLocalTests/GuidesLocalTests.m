@@ -20,11 +20,16 @@
 @property (nonatomic, strong) NSURL *documentFileURL;
 @property (nonatomic, strong) GuideDocument *testDocument;
 @property (nonatomic, strong) NSFileManager *fileManager;
+@property (nonatomic, strong) UIApplication *myApp;
+@property (nonatomic, strong) UINavigationController *masterNavC;
+@property (nonatomic, strong) UISplitViewController *masterSplitVC;
 
 @end
 
 //#define kUnitTestFileName   @"TestGuide.spkn"
-#define kDocumentTestText   @"Something there is that doesn't love a wall"
+//#define kDocumentTestText   @"Something there is that doesn't love a wall"
+#define kDocumentTestText   @"Something there"
+
 #define POLL_INTERVAL 0.05 //50ms
 #define N_SEC_TO_POLL 1.0 //poll for 1s
 #define MAX_POLL_COUNT N_SEC_TO_POLL / POLL_INTERVAL
@@ -47,13 +52,23 @@
     
     self.fileManager = [NSFileManager defaultManager];
     [self.fileManager removeItemAtURL:self.documentFileURL error:NULL];
-    
+    self.myApp = [UIApplication sharedApplication];
+
+    if ([[self.myApp.keyWindow rootViewController] isKindOfClass:[UISplitViewController class]]) {
+        self.masterSplitVC = (UISplitViewController *)[self.myApp.keyWindow rootViewController];
+        self.masterNavC = (UINavigationController *)[self.masterSplitVC.viewControllers objectAtIndex:0];
+    }
+    else {
+        self.masterNavC = (UINavigationController *)[self.myApp.keyWindow rootViewController];
+    }
     _blockCalled = NO;
 }
 
 - (void)tearDown
 {
-    [self.fileManager removeItemAtURL:self.documentFileURL error:NULL];
+  //  [self.fileManager removeItemAtURL:self.documentFileURL error:NULL];
+  //  self.documentFileURL = [NSURL fileURLWithPath:self.documentNameWithExtn];
+  //  [self.fileManager removeItemAtURL:self.documentFileURL error:NULL];
 }
 
 - (void)blockCalled
@@ -79,16 +94,11 @@
 
 - (void)testinsertNewObject
 {
-    UIApplication *myApp = [UIApplication sharedApplication];
-    UINavigationController *masterNavC;
-    if ([[myApp.keyWindow rootViewController] isKindOfClass:[UISplitViewController class]]) {
-        UISplitViewController *masterSplitVC = (UISplitViewController *)[myApp.keyWindow rootViewController];
-        masterNavC = (UINavigationController *)[masterSplitVC.viewControllers objectAtIndex:0];
-    }
-    else {
-        masterNavC = (UINavigationController *)[myApp.keyWindow rootViewController];
-    }
-    DocumentsListTVC *masterTVC = (DocumentsListTVC *)[masterNavC topViewController];
+    
+  //  if ([[self.myApp.keyWindow rootViewController] isKindOfClass:[UISplitViewController class]]) {
+  //      UINavigationController  * rightNavController = [self.masterSplitVC.viewControllers objectAtIndex:1];
+  //  }
+    DocumentsListTVC *masterTVC = (DocumentsListTVC *)[self.masterNavC topViewController];
     __block BOOL done = NO;
     
     // get initial number of files
@@ -117,13 +127,72 @@
         XCTFail(@"polling timed out");
     }
     
+}
 
+-(void) testRenameFile
+{
+    DocumentViewController *documentVC;
+
+    // Get a pointer to the documentVC if running on the iPhone
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        UINavigationController *navController = (UINavigationController *)[self.myApp.keyWindow rootViewController];
+        documentVC = (DocumentViewController *)[navController topViewController];
+    }
+    else {
+        // running on iPad
+        UINavigationController  * rightNavController = [self.masterSplitVC.viewControllers objectAtIndex:1];
+        documentVC = (DocumentViewController *)[rightNavController topViewController];
+    }
+    
+ //   DocumentsListTVC *masterTVC = (DocumentsListTVC *)[self.masterNavC topViewController];
+     __block BOOL done = NO;
+    
+    // Open editing mode
+    [documentVC.guideTextView becomeFirstResponder];
+    // Insert a line of text into the new file
+    documentVC.guideTextView.text = kDocumentTestText;
+    // Signal end of text editing
+    [documentVC.guideTextView resignFirstResponder];    // this will kick off the asynchronous saving of the document, closing the file and renaming it
+    
+    float delayInSeconds = .5;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+    dispatch_after(popTime, dispatch_get_main_queue(), ^{
+        // check if old file is gone
+        XCTAssertFalse([self.fileManager fileExistsAtPath:self.documentNameWithExtn], @"");
+        
+        // check if the file is renamed
+        self.documentNameWithExtn = [self.documentNameWithExtn stringByDeletingLastPathComponent];
+        self.documentNameWithExtn = [self.documentNameWithExtn stringByAppendingPathComponent:kDocumentTestText];
+        self.documentNameWithExtn = [self.documentNameWithExtn stringByAppendingPathExtension:FileExtension];
+        XCTAssertTrue([self.fileManager fileExistsAtPath:self.documentNameWithExtn], @"" );
+        
+        // check if the new file is closed
+        XCTAssertTrue(documentVC.guideDocument.documentState & UIDocumentStateClosed, @"");
+        
+        // check if text was saved in the new file
+        XCTAssertEqualObjects(documentVC.guideDocument.text, kDocumentTestText, @"");
+        done = YES;
+    });
+    
+    NSUInteger pollCount = 0;
+    
+    while (done == NO && pollCount < MAX_POLL_COUNT) {
+        NSLog(@"polling... %i", pollCount);
+        NSDate* untilDate = [NSDate dateWithTimeIntervalSinceNow:POLL_INTERVAL];
+        [[NSRunLoop currentRunLoop] runUntilDate:untilDate];
+        pollCount++;
+    }
+    if (pollCount == MAX_POLL_COUNT) {
+        XCTFail(@"polling timed out");
+    }
+  
+    
 }
 
 
 
 // READING FILE DATA
-- (void) testLoadingRetrievesData
+- (void) LoadingRetrievesData
 {
     // create the document with text
     GuideDocument *document = [[GuideDocument alloc]initWithFileURL:self.documentFileURL];
@@ -167,7 +236,7 @@
 }
 
 // NO SUCH FILE TEST
-- (void) testLoadingWhenThereIsNoFile
+- (void) LoadingWhenThereIsNoFile
 {
     // given that the file does not exist
     // when we load a new document from that file
@@ -186,7 +255,7 @@
 }
 
 // LOAD FILE IS EMPTY
-- (void)testLoadingEmptyFile
+- (void)LoadingEmptyFile
 {
     // file is present but empty
     // create the document with text
@@ -230,7 +299,7 @@
 }
 
 // Load file has bad data
-- (void)testLoadingBadDataFile
+- (void)LoadingBadDataFile
 {
     // file is present but has bad data
     // create the document with an image saved in the text file
@@ -273,7 +342,7 @@
 }
 
 // Load file has bad data
-- (void)testExceptionDuringUnarchiveShouldFailGracefully {
+- (void)ExceptionDuringUnarchiveShouldFailGracefully {
     // file is present but has  data that will throw an exception during Unarchiving
     // create the document with an array of images
      UIImage *explodingObject = [[UIImage alloc]init];
