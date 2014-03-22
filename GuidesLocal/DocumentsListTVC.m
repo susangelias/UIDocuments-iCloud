@@ -214,29 +214,21 @@
                               blockSuccess = success;
                               // insert it into the array,
                               [self.fileList insertObject:self.selectedDocument.fileURL atIndex:0];
-                              
                               // and add a new row to the table view.
                               // updating UI so make sure on main queue
                               dispatch_async(dispatch_get_main_queue(), ^{
                                 NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
                                 [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-                                 // id detail = self.splitViewController.viewControllers[1];
-                                //  if (!detail) {
+                                if (!self.detailViewController) {
                                   [self performSegueWithIdentifier:@"showGuide" sender:self];
-                               //   }
-                               //   else if ([detail isKindOfClass:[UINavigationController class]]) {
-                                          // move past the UINavigation Controller
-                               //           detail = [((UINavigationController *)detail).viewControllers firstObject];
-
-                                //          if ([detail isKindOfClass:[GuideDetailViewController class]]) {
-                                              // update the detail view
-                                //              [self prepareGuideDocumentVC:detail withURL:nil];
-                                //          }
-                                 //   }
-                              });
-                          }
+                                }
+                                else {
+                                    [self setupDestinationVC:self.detailViewController];
+                                }
+                        });
+                    }
                           
-                      }];
+                }];
         }
     }
   }
