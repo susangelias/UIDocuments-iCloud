@@ -194,6 +194,7 @@
 - (IBAction)insertNewObject:(UIBarButtonItem *)sender {
     
     __block BOOL blockSuccess = YES;
+    GuideDocument *newDocument;
     
     // Create a new instance of the appropriate class,
     NSURL *url = [self getDocURL];
@@ -203,10 +204,11 @@
     }
     else {
         // create new file
-        self.selectedDocument = [[GuideDocument alloc]initWithFileURL:url];
+        newDocument = [[GuideDocument alloc]initWithFileURL:url];
         
         // save new file
-        if (self.selectedDocument) {
+        if (newDocument) {
+            self.selectedDocument = newDocument;
             [self.selectedDocument saveToURL:url
                        forSaveOperation:UIDocumentSaveForCreating
                       completionHandler:^(BOOL success) {
@@ -253,7 +255,7 @@
                      [documentToClose closeWithCompletionHandler:^(BOOL success) {
                          if (success) {
                              // see if file name has changed
-                             NSLog(@"CLOSE SUCCESS doc state = %d", weakSelf.selectedDocument.documentState);
+                         //    NSLog(@"CLOSE SUCCESS doc state = %d", weakSelf.selectedDocument.documentState);
                              if ( (![documentToClose.guideTitle isEqualToString:documentToClose.localizedName]) && (documentToClose.guideTitle) )
                              {
                                  // get index into file list for this item
@@ -269,7 +271,7 @@
                                  NSURL *renamedFileURL = [weakSelf renameDirectory:documentToClose.guideTitle];
                                  
                                  if (renamedFileURL) {
-                                     NSLog(@"rename sucess document state from old doc ptr = %d", weakSelf.selectedDocument.documentState);
+                        //             NSLog(@"rename sucess document state from old doc ptr = %d", weakSelf.selectedDocument.documentState);
                                      // add new url into file list at the end
                                      [weakSelf.fileList addObject:renamedFileURL];
                                      // resort file list alphabetically
@@ -280,12 +282,12 @@
                                      }];
                                      // tell our table view to refresh
                                      [weakSelf.tableView reloadData];
-                                     weakSelf.selectedDocument = nil;
+                                
                                      // instantiate renamed document
-                                     weakSelf.selectedDocument = [[GuideDocument alloc]initWithFileURL:renamedFileURL];
-                                     NSLog(@"renamed doc state %d", weakSelf.selectedDocument.documentState);
-                                     
-                                 }
+                                     GuideDocument *renamedDocument = [[GuideDocument alloc]initWithFileURL:renamedFileURL];
+                                     weakSelf.selectedDocument = renamedDocument;
+                         //            NSLog(@"renamed doc state %d", weakSelf.selectedDocument.documentState);
+                                }
                              }
                              // remove document text from diplay ?
                              //  weakSelf.selectedDocument = nil;
@@ -361,14 +363,15 @@
 
 - (void) prepareGuideDocumentVCWithURL: (NSURL *)url
 {
+    GuideDocument *guideDocument;
     if (url) {
         // release our current document
-     //   self.selectedDocument = nil;
-        self.selectedDocument = [[GuideDocument alloc]initWithFileURL:url];
-        NSLog(@"prepareGuideDocumentVCWithURL DOCSTATE = %d", self.selectedDocument.documentState);
-        self.selectedDocument.delegate   = self;
+        guideDocument = [[GuideDocument alloc]initWithFileURL:url];
+   //     NSLog(@"prepareGuideDocumentVCWithURL DOCSTATE = %d", guideDocument.documentState);
+        guideDocument.delegate   = self;
     }
-    if (self.selectedDocument) {
+    if (guideDocument) {
+        self.selectedDocument = guideDocument;
         if (self.selectedDocument.documentState & UIDocumentStateClosed) {
             [self.selectedDocument openWithCompletionHandler:^(BOOL success) {
                 if (success) {
@@ -380,7 +383,7 @@
                     }
                 }
                 else {
-                    NSLog(@"document open error %@, %d", self.selectedDocument.fileURL, self.selectedDocument.documentState);
+      //              NSLog(@"document open error %@, %d", self.selectedDocument.fileURL, self.selectedDocument.documentState);
                 }
 
             }];

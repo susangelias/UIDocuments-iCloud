@@ -121,7 +121,7 @@
             
             // let delegate know the document content has changed
             if (!self.guideDocument.documentState & UIDocumentStateNormal) {
-                NSLog(@"documentState = %d", self.guideDocument.documentState);
+         //       NSLog(@"documentState = %d", self.guideDocument.documentState);
             }
             else {
                 [self.delegate documentContentChanged];

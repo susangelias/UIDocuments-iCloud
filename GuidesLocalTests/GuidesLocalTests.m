@@ -66,6 +66,7 @@
 
 - (void)tearDown
 {
+    [super tearDown];
   //  [self.fileManager removeItemAtURL:self.documentFileURL error:NULL];
   //  self.documentFileURL = [NSURL fileURLWithPath:self.documentNameWithExtn];
   //  [self.fileManager removeItemAtURL:self.documentFileURL error:NULL];
@@ -189,7 +190,11 @@
     
 }
 
-
+// Attempting to create duplicate file name
+-(void)testDuplicateFileName
+{
+    XCTFail(@"testDuplicateFileName not implemented yet");
+}
 
 // READING FILE DATA
 - (void) LoadingRetrievesData

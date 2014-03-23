@@ -20,10 +20,10 @@
             </objects>
             <point key="canvasLocation" x="528" y="58"/>
         </scene>
-        <!--Documents ListTVC - Master-->
+        <!--Documents ListTVC - Guides-->
         <scene sceneID="H2g-7m-Iec">
             <objects>
-                <tableViewController title="Master" id="vJk-s1-2jo" customClass="DocumentsListTVC" sceneMemberID="viewController">
+                <tableViewController id="vJk-s1-2jo" customClass="DocumentsListTVC" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="arj-Gs-xWA">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
