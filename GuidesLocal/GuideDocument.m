@@ -87,15 +87,15 @@
 }
 
 - (BOOL)loadFromContents:(id)contents ofType:(NSString *)typeName error:(NSError *__autoreleasing *)outError {
-  
+
     BOOL retVal = YES;
     
     self.fileWrapper = (NSFileWrapper *) contents;
     
-    // CHECK FOR EMPTY FILE
-    if ((![self.text respondsToSelector:@selector(isEqualToString:)]) || [self.text isEqualToString:@""]) {
-        retVal = NO;
-    }
+    // CHECK FOR EMPTY FILE - DOESN'T WORK WHEN I'M TRYING TO RENAME AN NEW EMPTY FILE !
+ ///   if ((![self.text respondsToSelector:@selector(isEqualToString:)]) || [self.text isEqualToString:@""]) {
+  //      retVal = NO;
+ //   }
     
     // The rest will be lazy loaded...
     self.text = nil;
@@ -106,7 +106,7 @@
         }
 
     return retVal;
-    
+
 }
 
 

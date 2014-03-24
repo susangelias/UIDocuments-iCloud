@@ -91,7 +91,13 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
-                    <navigationItem key="navigationItem" id="pfY-2U-o9t"/>
+                    <navigationItem key="navigationItem" id="pfY-2U-o9t">
+                        <barButtonItem key="rightBarButtonItem" title="Edit" id="NNK-lI-p4m">
+                            <connections>
+                                <action selector="EditDoneButtonPressed:" destination="xVe-pz-42J" id="JpF-Fb-YAl"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="guideTextView" destination="J3A-6K-VrV" id="dH8-fK-zLU"/>
                     </connections>

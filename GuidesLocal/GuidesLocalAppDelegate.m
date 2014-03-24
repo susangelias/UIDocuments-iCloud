@@ -7,6 +7,8 @@
 //
 
 #import "GuidesLocalAppDelegate.h"
+#import "DocumentsListTVC.h"
+#import "DocumentViewController.h"
 
 @implementation GuidesLocalAppDelegate
 
@@ -14,9 +16,23 @@
 {
     // Override point for customization after application launch.
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        /*
         UISplitViewController *splitViewController = (UISplitViewController *)self.window.rootViewController;
-        UINavigationController *navigationController = [splitViewController.viewControllers lastObject];
-        splitViewController.delegate = (id)navigationController.topViewController;
+        UINavigationController *leftNavController = [splitViewController.viewControllers objectAtIndex:0];
+        DocumentsListTVC *leftViewController = (DocumentsListTVC *)[leftNavController topViewController];
+        UINavigationController  * rightNavController = [splitViewController.viewControllers objectAtIndex:1];
+        DocumentViewController *rightViewController = (DocumentViewController *)[rightNavController topViewController];
+        
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+        [leftViewController.tableView selectRowAtIndexPath:indexPath
+                                                  animated:YES
+                                            scrollPosition:UITableViewScrollPositionTop];
+        
+        NSURL *fileURL = [leftViewController.fileList objectAtIndex:0];
+        leftViewController.selectedDocument = [[GuideDocument alloc]initWithFileURL:fileURL];
+        rightViewController.guideDocument = leftViewController.selectedDocument;
+        splitViewController.delegate = rightViewController;
+         */
     }
     return YES;
 }

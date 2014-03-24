@@ -11,6 +11,9 @@
 #import "FileExtension.h"
 
 
+NSString * const editDoneButtonTitleEdit = @"Edit";
+NSString * const editDoneButtonTitleDone = @"Done";
+
 @interface DocumentViewController () <UITextViewDelegate>
 
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
@@ -46,6 +49,27 @@
     [super viewWillDisappear:animated];
     self.guideDocument = nil;
 }
+
+#pragma mark User Action
+
+- (IBAction)EditDoneButtonPressed:(UIBarButtonItem *)sender {
+    
+    if ([sender.title isEqualToString:editDoneButtonTitleEdit]) {
+        // toggle button to done
+        sender.title = editDoneButtonTitleDone;
+        
+        // activate keyboard
+        [self.guideTextView becomeFirstResponder];
+    }
+    else {
+        // togggle button to edit
+        sender.title = editDoneButtonTitleEdit;
+        
+        // deactivate keyboard
+        [self.guideTextView resignFirstResponder];
+    }
+}
+
 
 #pragma mark SplitViewController Delegate
 
@@ -102,6 +126,12 @@
 
 #pragma mark UITextViewDelegate Methods
 
+-(void)textViewDidBeginEditing:(UITextView *)textView
+{
+    // toggle the edit/done button in the navigation bar to match state
+    UIBarButtonItem *editButton = [self.navigationItem rightBarButtonItem];
+    editButton.title = editDoneButtonTitleDone;
+}
 
 -(void)textViewDidEndEditing:(UITextView *)textView
 {
@@ -128,6 +158,9 @@
             }
         }
     }
+    // toggle the edit/done button in the navigation bar to match state
+    UIBarButtonItem *editButton = [self.navigationItem rightBarButtonItem];
+    editButton.title = editDoneButtonTitleEdit;
 }
 
 
