@@ -43,7 +43,11 @@ NSString * const editDoneButtonTitleDone = @"Done";
                     name:UIContentSizeCategoryDidChangeNotification
                 object:nil ];
     self.guideTextView.delegate = self;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
 }
+
 
 -(void)preferredContentSizeChanged:(NSNotification *)notification
 {
@@ -169,8 +173,68 @@ NSString * const editDoneButtonTitleDone = @"Done";
     // toggle the edit/done button in the navigation bar to match state
     UIBarButtonItem *editButton = [self.navigationItem rightBarButtonItem];
     editButton.title = editDoneButtonTitleEdit;
+    
 }
 
+-(void) keyboardWillShow:(NSNotification *)note
+{
+    // Get the keyboard size
+    CGRect keyboardBounds;
+    [[note.userInfo valueForKey:UIKeyboardFrameBeginUserInfoKey] getValue: &keyboardBounds];
+    
+    // Detect orientation
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    CGRect frame = self.guideTextView.frame;
+    
+    // Start animation
+    [UIView beginAnimations:nil context:NULL];
+    [UIView setAnimationBeginsFromCurrentState:YES];
+    [UIView setAnimationDuration:0.3f];
+    
+    // Reduce size of the Table view
+    if (orientation == UIInterfaceOrientationPortrait || orientation == UIInterfaceOrientationPortraitUpsideDown)
+        frame.size.height -= keyboardBounds.size.height;
+    else
+        frame.size.height -= keyboardBounds.size.width;
+    
+    // Apply new size of table view
+    self.guideTextView.frame = frame;
+    
+    // Scroll the table view to see the TextField just above the keyboard
+    if (self.guideTextView)
+    {
+        CGRect textFieldRect = [self.guideTextView convertRect:self.guideTextView.superview.bounds fromView:self.guideTextView.superview];
+        [self.guideTextView scrollRectToVisible:textFieldRect animated:NO];
+    }
+    
+    [UIView commitAnimations];
+}
+
+-(void) keyboardWillHide:(NSNotification *)note
+{
+    // Get the keyboard size
+    CGRect keyboardBounds;
+    [[note.userInfo valueForKey:UIKeyboardFrameBeginUserInfoKey] getValue: &keyboardBounds];
+    
+    // Detect orientation
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    CGRect frame = self.guideTextView.frame;
+    
+    [UIView beginAnimations:nil context:NULL];
+    [UIView setAnimationBeginsFromCurrentState:YES];
+    [UIView setAnimationDuration:0.3f];
+    
+    // Reduce size of the Table view
+    if (orientation == UIInterfaceOrientationPortrait || orientation == UIInterfaceOrientationPortraitUpsideDown)
+        frame.size.height += keyboardBounds.size.height;
+    else
+        frame.size.height += keyboardBounds.size.width;
+    
+    // Apply new size of table view
+    self.guideTextView.frame = frame;
+    
+    [UIView commitAnimations];
+}
 
 
 
