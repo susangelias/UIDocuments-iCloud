@@ -315,6 +315,23 @@
 
 #pragma mark - Table View Data Source
 
+// adjust the size of the table's rows depending on the user's font size setting from the
+// system's Settings:General menu
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static UILabel *label;
+    if (!label) {
+        label = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, FLT_MAX, FLT_MAX)];
+        label.text = @"test";
+    }
+    // set font to user's size
+    label.font  = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
+    // size the frame to fit the font
+    [label sizeToFit];
+    // add a little white space around the text
+    return label.frame.size.height * 1.7;
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     return 1;
