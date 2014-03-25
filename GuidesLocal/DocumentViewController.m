@@ -57,11 +57,6 @@ NSString * const editDoneButtonTitleDone = @"Done";
     
 }
 
-- (void) viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    self.guideDocument = nil;
-}
 
 #pragma mark User Action
 
