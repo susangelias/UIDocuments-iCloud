@@ -93,12 +93,21 @@
 	// Do any additional setup after loading the view, typically from a nib.
     self.navigationItem.leftBarButtonItem = self.editButtonItem;
 
- //   UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
- //   self.navigationItem.rightBarButtonItem = addButton;
     self.detailViewController = (DocumentViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
+    // sign up to catch any changes the user makes to the font settings
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+        selector:@selector(preferredContentSizeChanged:)
+        name:UIContentSizeCategoryDidChangeNotification
+        object:nil ];
     [self refresh];
     
+}
+
+-(void)preferredContentSizeChanged:(NSNotification *)notification
+{
+    [self.tableView reloadData];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -322,6 +331,9 @@
 
     NSString *fileName = [[self.fileList objectAtIndex:indexPath.row] lastPathComponent];
     cell.textLabel.text = [fileName stringByDeletingPathExtension];
+    
+    // set font to use the user's font settings
+    cell.textLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
     return cell;
 }
 

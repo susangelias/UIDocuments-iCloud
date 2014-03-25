@@ -28,13 +28,26 @@ NSString * const editDoneButtonTitleDone = @"Done";
 {
     [super awakeFromNib];
     self.splitViewController.delegate = self;
+    
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
+  
+    self.guideTextView.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+    // sign up to catch any changes the user makes to the font settings
+    [[NSNotificationCenter defaultCenter]
+            addObserver:self
+                selector:@selector(preferredContentSizeChanged:)
+                    name:UIContentSizeCategoryDidChangeNotification
+                object:nil ];
     self.guideTextView.delegate = self;
+}
+
+-(void)preferredContentSizeChanged:(NSNotification *)notification
+{
+    self.guideTextView.font  = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
 }
 
 - (void) viewWillAppear:(BOOL)animated
