@@ -254,59 +254,65 @@
     else {
         documentToClose = self.selectedDocument;
     }
-    DocumentsListTVC *weakSelf = self;
-    // save the document
-    [documentToClose saveToURL:documentToClose.fileURL
-              forSaveOperation:UIDocumentSaveForOverwriting
-             completionHandler:^(BOOL success) {
-                 if (success) {
-                     // close document
-                     [documentToClose closeWithCompletionHandler:^(BOOL success) {
-                         if (success) {
-                             // see if file name has changed
-                             if ( (![documentToClose.guideTitle isEqualToString:documentToClose.localizedName]) && (documentToClose.guideTitle) )
-                             {
-                                 // get index into file list for this item
-                                 NSInteger tableItemToRenameIndex = NSNotFound;
-                                 tableItemToRenameIndex = [weakSelf.fileList indexOfObject:documentToClose.fileURL];
-                                 // delete cell from file list
-                                 if (tableItemToRenameIndex != NSNotFound) {
-                                     [weakSelf.fileList removeObjectAtIndex:tableItemToRenameIndex];
-                                     // get cell in table view for this item
-                                     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:tableItemToRenameIndex inSection:0];
-                                     // delete item from table view
-                                     [weakSelf.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:YES];
+
+    // Check that document is not already closed
+    if (documentToClose.documentState & UIDocumentStateClosed) {
+        return;
+    }
+    else {
+        DocumentsListTVC *weakSelf = self;
+        // save the document
+        [documentToClose saveToURL:documentToClose.fileURL
+                  forSaveOperation:UIDocumentSaveForOverwriting
+                 completionHandler:^(BOOL success) {
+                     if (success) {
+                         // close document
+                         [documentToClose closeWithCompletionHandler:^(BOOL success) {
+                             if (success) {
+                                 // see if file name has changed
+                                 if ( (![documentToClose.guideTitle isEqualToString:documentToClose.localizedName]) && (documentToClose.guideTitle) )
+                                 {
+                                     // get index into file list for this item
+                                     NSInteger tableItemToRenameIndex = NSNotFound;
+                                     tableItemToRenameIndex = [weakSelf.fileList indexOfObject:documentToClose.fileURL];
+                                     // delete cell from file list
+                                     if (tableItemToRenameIndex != NSNotFound) {
+                                         [weakSelf.fileList removeObjectAtIndex:tableItemToRenameIndex];
+                                         // get cell in table view for this item
+                                         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:tableItemToRenameIndex inSection:0];
+                                         // delete item from table view
+                                         [weakSelf.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:YES];
+                                     }
+                                     // rename the file
+                                     NSURL *renamedFileURL = [weakSelf renameDirectory:documentToClose.guideTitle];
+                                     
+                                     if (renamedFileURL) {
+                                         // add new url into file list at the end
+                                         [weakSelf.fileList addObject:renamedFileURL];
+                                         // resort file list alphabetically
+                                         [weakSelf.fileList sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+                                             NSString *f1 = [(NSURL *)obj1 absoluteString];
+                                             NSString *f2 = [(NSURL *)obj2 absoluteString];
+                                             return [f1 localizedStandardCompare:f2];
+                                         }];
+                                         // tell our table view to refresh
+                                         [weakSelf.tableView reloadData];
+                                    
+                                         // instantiate renamed document
+                                        GuideDocument *renamedDocument = [[GuideDocument alloc]initWithFileURL:renamedFileURL];
+                                        weakSelf.selectedDocument = renamedDocument;
+                                    }
                                  }
-                                 // rename the file
-                                 NSURL *renamedFileURL = [weakSelf renameDirectory:documentToClose.guideTitle];
-                                 
-                                 if (renamedFileURL) {
-                                     // add new url into file list at the end
-                                     [weakSelf.fileList addObject:renamedFileURL];
-                                     // resort file list alphabetically
-                                     [weakSelf.fileList sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-                                         NSString *f1 = [(NSURL *)obj1 absoluteString];
-                                         NSString *f2 = [(NSURL *)obj2 absoluteString];
-                                         return [f1 localizedStandardCompare:f2];
-                                     }];
-                                     // tell our table view to refresh
-                                     [weakSelf.tableView reloadData];
-                                
-                                     // instantiate renamed document
-                                     GuideDocument *renamedDocument = [[GuideDocument alloc]initWithFileURL:renamedFileURL];
-                                     weakSelf.selectedDocument = renamedDocument;
-                                }
+     
                              }
- 
-                         }
-                     }];
-                     
-                 }
-                 else {
-                     NSLog(@"ERROR SAVING DOCUMENT %@", documentToClose.fileURL);
-                 }
-             }];
-   
+                         }];
+                         
+                     }
+                     else {
+                         NSLog(@"ERROR SAVING DOCUMENT %@", documentToClose.fileURL);
+                     }
+                 }];
+    }
 
 }
 
