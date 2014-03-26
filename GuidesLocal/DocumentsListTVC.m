@@ -264,23 +264,23 @@
                      [documentToClose closeWithCompletionHandler:^(BOOL success) {
                          if (success) {
                              // see if file name has changed
-                         //    NSLog(@"CLOSE SUCCESS doc state = %d", weakSelf.selectedDocument.documentState);
                              if ( (![documentToClose.guideTitle isEqualToString:documentToClose.localizedName]) && (documentToClose.guideTitle) )
                              {
                                  // get index into file list for this item
-                                 NSInteger tableItemToRenameIndex = [weakSelf.fileList indexOfObject:documentToClose.fileURL];
+                                 NSInteger tableItemToRenameIndex = NSNotFound;
+                                 tableItemToRenameIndex = [weakSelf.fileList indexOfObject:documentToClose.fileURL];
                                  // delete cell from file list
-                                 [weakSelf.fileList removeObjectAtIndex:tableItemToRenameIndex];
-                                 // get cell in table view for this item
-                                 NSIndexPath *indexPath = [NSIndexPath indexPathForRow:tableItemToRenameIndex inSection:0];
-                                 // delete item from table view
-                                 [weakSelf.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:YES];
-                                 
+                                 if (tableItemToRenameIndex != NSNotFound) {
+                                     [weakSelf.fileList removeObjectAtIndex:tableItemToRenameIndex];
+                                     // get cell in table view for this item
+                                     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:tableItemToRenameIndex inSection:0];
+                                     // delete item from table view
+                                     [weakSelf.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:YES];
+                                 }
                                  // rename the file
                                  NSURL *renamedFileURL = [weakSelf renameDirectory:documentToClose.guideTitle];
                                  
                                  if (renamedFileURL) {
-                        //             NSLog(@"rename sucess document state from old doc ptr = %d", weakSelf.selectedDocument.documentState);
                                      // add new url into file list at the end
                                      [weakSelf.fileList addObject:renamedFileURL];
                                      // resort file list alphabetically
@@ -295,12 +295,9 @@
                                      // instantiate renamed document
                                      GuideDocument *renamedDocument = [[GuideDocument alloc]initWithFileURL:renamedFileURL];
                                      weakSelf.selectedDocument = renamedDocument;
-                         //            NSLog(@"renamed doc state %d", weakSelf.selectedDocument.documentState);
                                 }
                              }
-                             // remove document text from diplay ?
-                             //  weakSelf.selectedDocument = nil;
-                             //  weakSelf.detailViewController.guideDocument = nil;
+ 
                          }
                      }];
                      
