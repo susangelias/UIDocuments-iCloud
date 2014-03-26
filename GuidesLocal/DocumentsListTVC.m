@@ -464,18 +464,24 @@
 
 - (void)documentContentEmpty:(NSURL *)fileURL
 {
+    NSInteger tableItemToDeleteIndex = -1;
     // remove url from file list
-    NSInteger tableItemToDeleteIndex = [self.fileList indexOfObject:fileURL];
-    [self.fileList removeObjectAtIndex:tableItemToDeleteIndex];   // call tableView to remove row
-
-    // remove document name from table view
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:tableItemToDeleteIndex inSection:0];
-    [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    if ([self.fileList count] > 0) {
+        tableItemToDeleteIndex = [self.fileList indexOfObject:fileURL];
+        [self.fileList removeObjectAtIndex:tableItemToDeleteIndex];   // call tableView to remove row
+    }
+    
+    if (tableItemToDeleteIndex > -1) {
+        // remove document name from table view
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:tableItemToDeleteIndex inSection:0];
+        [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    }
     
     // delete document
     [self deleteGuide:fileURL];
-
+    
 }
+
 
 
 
