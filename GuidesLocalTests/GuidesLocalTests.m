@@ -191,7 +191,7 @@
 }
 
 // Attempting to create duplicate file name
--(void)testDuplicateFileName
+-(void)DuplicateFileName
 {
     XCTFail(@"testDuplicateFileName not implemented yet");
 }
