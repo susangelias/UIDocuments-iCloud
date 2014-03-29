@@ -112,7 +112,9 @@
     dispatch_after(popTime, dispatch_get_main_queue(), ^{
         // check if the file was created and in the correct state
         XCTAssertEqual(initialNumberOfFiles+1, [masterTVC.fileList count], @"");
-        XCTAssertTrue([self.fileManager fileExistsAtPath:self.documentNameWithExtn], @"" );
+//        XCTAssertTrue([self.fileManager fileExistsAtPath:self.documentNameWithExtn], @"" );
+        NSString *newFilePath = [masterTVC.selectedDocument.fileURL path];
+        XCTAssertTrue([self.fileManager fileExistsAtPath:newFilePath], @"" );
         done = YES;
     });
  
@@ -172,6 +174,12 @@
         
         // check if text was saved in the new file
         XCTAssertEqualObjects(documentVC.guideDocument.text, kDocumentTestText, @"");
+        
+        // Remove created file
+        if ([self.fileManager fileExistsAtPath:self.documentNameWithExtn]) {
+            [self.fileManager removeItemAtPath:self.documentNameWithExtn error:NULL];
+        }
+    
         done = YES;
     });
     
@@ -187,14 +195,10 @@
         XCTFail(@"polling timed out");
     }
   
-    
+
 }
 
-// Attempting to create duplicate file name
--(void)DuplicateFileName
-{
-    XCTFail(@"testDuplicateFileName not implemented yet");
-}
+
 
 // READING FILE DATA
 - (void) LoadingRetrievesData

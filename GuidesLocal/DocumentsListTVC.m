@@ -138,6 +138,8 @@
     NSString *guideName = nil;
     
     guideName = kGenericFileName;
+    // append the date to the name to make sure it is unique
+    guideName = [guideName stringByAppendingString:[NSString stringWithFormat:@"%@", [NSDate date]]];
     
     NSString *textFileNameWithExtention = [NSString stringWithFormat:@"%@.%@", guideName, FileExtension];
     
@@ -148,6 +150,7 @@
     else {
         NSLog(@"ERROR:  self.documentsDirectoryPath = nil");
     }
+    
     return url;
 }
 
