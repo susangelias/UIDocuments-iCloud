@@ -21,6 +21,8 @@
 
 @implementation DocumentsListTVC
 
+#define kTABLE_ROW_WHITE_SPACE 2.5
+
 - (NSMutableArray *)fileList
 {
     if (!_fileList) {
@@ -335,7 +337,7 @@
     // size the frame to fit the font
     [label sizeToFit];
     // add a little white space around the text
-    return label.frame.size.height * 1.7;
+    return label.frame.size.height * kTABLE_ROW_WHITE_SPACE;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
