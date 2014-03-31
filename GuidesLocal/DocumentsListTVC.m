@@ -14,7 +14,7 @@
 
 @property (nonatomic, strong) NSString *documentsDirectoryPath;
 @property  BOOL iCloudOn;
-
+@property (nonatomic, strong) NSDateFormatter *newDateFormatter;
 @end
 
 
@@ -22,6 +22,7 @@
 @implementation DocumentsListTVC
 
 #define kTABLE_ROW_WHITE_SPACE 2.5
+#define kLENGTH_OF_DATE_STRING 25
 
 - (NSMutableArray *)fileList
 {
@@ -31,6 +32,17 @@
     }
     return _fileList;
 }
+
+- (NSDateFormatter *)newDateFormatter
+{
+    if (!_newDateFormatter) {
+         _newDateFormatter  = [[NSDateFormatter alloc] init];
+        [_newDateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+        [_newDateFormatter setDateFormat:@"yyyy-MM-dd hh:mm:ss +0000"];
+    }
+    return _newDateFormatter;
+}
+
 
 #pragma mark Refresh Methods
 // these methods courtesy of http://www.raywenderlich.com/12779/icloud-and-uidocument-beyond-the-basics-part-1
@@ -73,27 +85,29 @@
     }
  }
 
+#pragma mark View Lifecycle
 
 - (void)awakeFromNib
 {
+    [super awakeFromNib];
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         self.clearsSelectionOnViewWillAppear = NO;
         self.preferredContentSize = CGSizeMake(320.0, 600.0);
     }
-    [super awakeFromNib];
     
     // get this app's documents directory path
     self.documentsDirectoryPath = [NSSearchPathForDirectoriesInDomains( NSDocumentDirectory,
                                                                        NSUserDomainMask, YES ) objectAtIndex:0];
     self.iCloudOn = NO;
-    
+   
+    self.navigationItem.leftBarButtonItem = self.editButtonItem;
+
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
-    self.navigationItem.leftBarButtonItem = self.editButtonItem;
 
     self.detailViewController = (DocumentViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
@@ -134,14 +148,15 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (NSURL *) getDocURL
+- (NSURL *) createURLForNewDocument
 {
     NSURL *url = nil;
     NSString *guideName = nil;
     
     guideName = kGenericFileName;
     // append the date to the name to make sure it is unique
-    guideName = [guideName stringByAppendingString:[NSString stringWithFormat:@"%@", [NSDate date]]];
+    NSDate *now = [NSDate date];
+    guideName = [[guideName stringByAppendingString:[NSString stringWithFormat:@"%@", [self.newDateFormatter stringFromDate:now]]] copy];
     
     NSString *textFileNameWithExtention = [NSString stringWithFormat:@"%@.%@", guideName, FileExtension];
     
@@ -190,6 +205,10 @@
     NSError *error = nil;
     
     NSString *oldPath = [self.selectedDocument.fileURL path];
+    // append the date to the name to make sure it is unique
+    NSDate *now = [NSDate date];
+    newName = [newName stringByAppendingString:[NSString stringWithFormat:@"%@", [self.newDateFormatter stringFromDate:now]]];
+    // append the file extension to the new name
     newName = [[newName stringByAppendingPathExtension:FileExtension]mutableCopy];
     NSMutableString *newPath = [[oldPath stringByDeletingLastPathComponent] mutableCopy];
     newPath = [[newPath stringByAppendingPathComponent:newName]mutableCopy];
@@ -211,7 +230,7 @@
     GuideDocument *newDocument;
     
     // Create a new instance of the appropriate class,
-    NSURL *url = [self getDocURL];
+    NSURL *url = [self createURLForNewDocument];
     
     if (!url) {
         NSLog(@"ERROR:  File url = %@", url);
@@ -275,7 +294,8 @@
                          [documentToClose closeWithCompletionHandler:^(BOOL success) {
                              if (success) {
                                  // see if file name has changed
-                                 if ( (![documentToClose.guideTitle isEqualToString:documentToClose.localizedName]) && (documentToClose.guideTitle) )
+                                 NSString *currentTitle = documentToClose.localizedName;
+                                 if ( (![documentToClose.guideTitle isEqualToString:currentTitle]) && (documentToClose.guideTitle) )
                                  {
                                      // get index into file list for this item
                                      NSInteger tableItemToRenameIndex = NSNotFound;
@@ -355,7 +375,17 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
 
     NSString *fileName = [[self.fileList objectAtIndex:indexPath.row] lastPathComponent];
-    cell.textLabel.text = [fileName stringByDeletingPathExtension];
+    NSString *dateString;
+    fileName = [[fileName stringByDeletingPathExtension]copy];
+    NSRange dateStringRange = NSMakeRange([fileName length]-kLENGTH_OF_DATE_STRING, kLENGTH_OF_DATE_STRING);
+    if (dateStringRange.location < [fileName length]) {
+        dateString = [fileName substringWithRange:dateStringRange];
+        fileName = [fileName stringByReplacingCharactersInRange:dateStringRange withString:@""];
+    }
+    cell.textLabel.text = [fileName copy];
+    
+
+    cell.detailTextLabel.text = [[self getDateToDisplay:dateString]copy];
     
     // set font to use the user's font settings
     cell.textLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
@@ -394,6 +424,47 @@
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         NSLog(@"INSERTION");
     }
+}
+
+#pragma mark Helpers
+
+#define kSECONDS_IN_24_HOURS 86400
+#define kSECONDS_IN_ONE_WEEK kSECONDS_IN_24_HOURS * 7
+
+-(NSString *)getDateToDisplay:(NSString *)fileModDateString
+{
+    NSString *dateToDisplay = [fileModDateString copy];
+
+    static NSDateFormatter *dateFormatter = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        dateFormatter = [[NSDateFormatter alloc]init];
+        [dateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    });
+    
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss +0000"];
+    NSDate *fileModDate = [[NSDate alloc]init];
+    fileModDate = [dateFormatter dateFromString:fileModDateString];
+
+    // Negative timeIntervalSinceNow is in the past but decision logic
+    // below is better when comparing a positive number so am doing
+    // a sign change here on timeInt
+    NSTimeInterval timeInt = -[fileModDate timeIntervalSinceNow];
+
+    if (timeInt  < kSECONDS_IN_24_HOURS) {
+        [dateFormatter setDateStyle:NSDateFormatterNoStyle];
+        [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
+    }
+    else if (timeInt < kSECONDS_IN_ONE_WEEK) {
+        [dateFormatter setDateFormat:@"EEEE"];
+    }
+    else {
+        [dateFormatter setDateStyle:NSDateFormatterShortStyle];
+        [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
+    }
+    dateToDisplay = [dateFormatter stringFromDate:fileModDate];
+    
+    return dateToDisplay;
 }
 
 #pragma mark    Navigation

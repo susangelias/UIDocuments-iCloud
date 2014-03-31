@@ -24,6 +24,8 @@ NSString * const editDoneButtonTitleDone = @"Done";
 
 @implementation DocumentViewController
 
+#define kTITLE_LENGTH 40
+
 - (void) awakeFromNib
 {
     [super awakeFromNib];
@@ -126,8 +128,8 @@ NSString * const editDoneButtonTitleDone = @"Done";
     // document name is the first line of text truncated to 20 characters
     NSArray *lines = [self.guideTextView.text  componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
     NSMutableString *firstLine = [[lines objectAtIndex:0]mutableCopy];   // get the first line
-    if ( [firstLine length] > 20 ) {
-        firstLine = [[firstLine substringToIndex:20]mutableCopy];
+    if ( [firstLine length] > kTITLE_LENGTH ) {
+        firstLine = [[firstLine substringToIndex:kTITLE_LENGTH]mutableCopy];
         // remove any trailing white space
         firstLine = [[firstLine stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]mutableCopy];
     }
