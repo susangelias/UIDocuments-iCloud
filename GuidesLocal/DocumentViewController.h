@@ -13,7 +13,7 @@
 
 @property (strong, nonatomic) GuideDocument *guideDocument;
 @property (weak, nonatomic) IBOutlet UITextView *guideTextView;
-@property (strong, nonatomic) id delegate;
+@property (weak, nonatomic) id delegate;
 
 @end
 
