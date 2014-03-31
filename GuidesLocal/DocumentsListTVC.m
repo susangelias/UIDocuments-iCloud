@@ -433,7 +433,6 @@
 
 -(NSString *)getDateToDisplay:(NSString *)fileModDateString
 {
-    NSString *dateToDisplay = [fileModDateString copy];
 
     static NSDateFormatter *dateFormatter = nil;
     static dispatch_once_t onceToken;
@@ -443,8 +442,7 @@
     });
     
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss +0000"];
-    NSDate *fileModDate = [[NSDate alloc]init];
-    fileModDate = [dateFormatter dateFromString:fileModDateString];
+    NSDate *fileModDate = [dateFormatter dateFromString:fileModDateString];
 
     // Negative timeIntervalSinceNow is in the past but decision logic
     // below is better when comparing a positive number so am doing
@@ -462,9 +460,7 @@
         [dateFormatter setDateStyle:NSDateFormatterShortStyle];
         [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
     }
-    dateToDisplay = [dateFormatter stringFromDate:fileModDate];
-    
-    return dateToDisplay;
+    return [dateFormatter stringFromDate:fileModDate];    
 }
 
 #pragma mark    Navigation
