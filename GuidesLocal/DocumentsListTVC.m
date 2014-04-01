@@ -38,7 +38,7 @@
     if (!_newDateFormatter) {
          _newDateFormatter  = [[NSDateFormatter alloc] init];
         [_newDateFormatter setFormatterBehavior:NSDateFormatterBehavior10_4];
-        [_newDateFormatter setDateFormat:@"yyyy-MM-dd hh:mm:ss +0000"];
+        [_newDateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss +0000"];
     }
     return _newDateFormatter;
 }
@@ -460,7 +460,7 @@
         [dateFormatter setDateStyle:NSDateFormatterShortStyle];
         [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
     }
-    return [dateFormatter stringFromDate:fileModDate];    
+    return [dateFormatter stringFromDate:fileModDate];
 }
 
 #pragma mark    Navigation
