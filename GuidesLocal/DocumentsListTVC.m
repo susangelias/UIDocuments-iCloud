@@ -373,18 +373,10 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-
-    NSString *fileName = [[self.fileList objectAtIndex:indexPath.row] lastPathComponent];
-    NSString *dateString;
-    fileName = [[fileName stringByDeletingPathExtension]copy];
-    NSRange dateStringRange = NSMakeRange([fileName length]-kLENGTH_OF_DATE_STRING, kLENGTH_OF_DATE_STRING);
-    if (dateStringRange.location < [fileName length]) {
-        dateString = [fileName substringWithRange:dateStringRange];
-        fileName = [fileName stringByReplacingCharactersInRange:dateStringRange withString:@""];
-    }
-    cell.textLabel.text = [fileName copy];
+    NSString *fileName = [self localizedNameWithoutDate:[self.fileList objectAtIndex:indexPath.row]];
+    NSString *dateString = [self dateStringFromLocalizedName:[self.fileList objectAtIndex:indexPath.row]];
     
-
+    cell.textLabel.text = [fileName copy];
     cell.detailTextLabel.text = [[self getDateToDisplay:dateString]copy];
     
     // set font to use the user's font settings
@@ -461,6 +453,32 @@
         [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
     }
     return [dateFormatter stringFromDate:fileModDate];
+}
+
+- (NSString *)localizedNameWithoutDate:(NSString *)fileName
+{
+    NSString *nameWithoutDate = nil;
+
+    nameWithoutDate = [[[fileName lastPathComponent]stringByDeletingPathExtension]copy];
+    NSRange dateStringRange = NSMakeRange([nameWithoutDate length]-kLENGTH_OF_DATE_STRING, kLENGTH_OF_DATE_STRING);
+    if (dateStringRange.location < [nameWithoutDate length]) {
+        nameWithoutDate = [nameWithoutDate stringByReplacingCharactersInRange:dateStringRange withString:@""];
+    }
+    
+    return nameWithoutDate;
+}
+
+- (NSString *)dateStringFromLocalizedName:(NSString *)fileName
+{
+    NSString *dateString = nil;
+    
+    dateString = [[[fileName lastPathComponent]stringByDeletingPathExtension]copy];
+    NSRange dateStringRange = NSMakeRange([dateString length]-kLENGTH_OF_DATE_STRING, kLENGTH_OF_DATE_STRING);
+    if (dateStringRange.location < [dateString length]) {
+        dateString = [dateString substringWithRange:dateStringRange];
+    }
+    
+    return dateString;
 }
 
 #pragma mark    Navigation
