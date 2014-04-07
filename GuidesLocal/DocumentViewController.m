@@ -120,10 +120,9 @@ NSString * const editDoneButtonTitleDone = @"Done";
 #pragma mark Helpers
 
 
-- (BOOL)checkFileName
+- (void)checkFileName
 {
     // check if document name needs to change
-    BOOL nameChanged = NO;
     
     // document name is the first line of text truncated to 20 characters
     NSArray *lines = [self.guideTextView.text  componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
@@ -136,9 +135,7 @@ NSString * const editDoneButtonTitleDone = @"Done";
     
     if (![firstLine isEqualToString:self.guideDocument.localizedName]) {
         self.guideDocument.guideTitle = firstLine;
-        nameChanged = YES;
     }
-    return nameChanged;
 }
 
 
@@ -164,7 +161,7 @@ NSString * const editDoneButtonTitleDone = @"Done";
             // update the model
             self.guideDocument.text = self.guideTextView.text;
             
-            // see if the name needs to change
+            // update the guide Document's guideTitle if the name needs to change
             [self checkFileName];
             
             // let delegate know the document content has changed
