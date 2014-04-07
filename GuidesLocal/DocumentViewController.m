@@ -54,6 +54,12 @@ NSString * const editDoneButtonTitleDone = @"Done";
     self.editButtonItem.action = @selector(EditDoneButtonPressed:);
 }
 
+- (void) viewWillDisappear:(BOOL)animated
+{
+    [self textViewDidEndEditing:self.guideTextView];
+    
+    [super viewWillDisappear:animated];
+}
 
 -(void)preferredContentSizeChanged:(NSNotification *)notification
 {
