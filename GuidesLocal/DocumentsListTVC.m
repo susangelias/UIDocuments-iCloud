@@ -294,7 +294,7 @@
                          [documentToClose closeWithCompletionHandler:^(BOOL success) {
                              if (success) {
                                  // see if file name has changed
-                                 NSString *currentTitle = documentToClose.localizedName;
+                                 NSString *currentTitle = [self localizedNameWithoutDate:[documentToClose.fileURL path]];
                                  if ( (![documentToClose.guideTitle isEqualToString:currentTitle]) && (documentToClose.guideTitle) )
                                  {
                                      // get index into file list for this item
